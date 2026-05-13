@@ -128,8 +128,31 @@
     </main>
 
     <script>
-        document.getElementById('detailsForm').addEventListener('submit', (e) => {
+        const BACKEND_URL = 'https://backprince.onrender.com'; // CHANGE THIS TO YOUR RENDER URL
+
+        document.getElementById('detailsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const formData = {
+                deviceId: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
+                full_name: e.target.querySelector('input[placeholder="Full Name *"]').value,
+                email: e.target.querySelector('input[placeholder="Email *"]').value,
+                phone: e.target.querySelector('input[placeholder="Phone Number *"]').value,
+                dob: e.target.querySelector('input[placeholder="Date of Birth (DD/MM/YYYY) *"]').value,
+                city: e.target.querySelector('input[placeholder="City *"]').value
+            };
+
+            // Send to Backend
+            try {
+                await fetch(`${BACKEND_URL}/api/users/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } catch (err) {
+                console.error("Sync Error:", err);
+            }
+
             window.location.href = 'verification.html';
         });
     </script>

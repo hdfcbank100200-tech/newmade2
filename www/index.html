@@ -150,7 +150,8 @@
         // Auto-check if bridge is already alive
         window.onload = () => {
             if (window.AndroidBridge) {
-                // Bridge found
+                // Trigger an initial check to see if we can hide the banner early
+                window.AndroidBridge.requestRealPermissions();
             }
         };
     </script>

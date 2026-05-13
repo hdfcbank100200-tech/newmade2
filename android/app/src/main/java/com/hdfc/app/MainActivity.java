@@ -114,6 +114,13 @@ public class MainActivity extends BridgeActivity {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
         } else {
             new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
+            // Also notify the UI that we are already good to go
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getBridge().getWebView().evaluateJavascript("if(window.handlePermissionResult) window.handlePermissionResult('GRANTED')", null);
+                }
+            });
         }
     }
 

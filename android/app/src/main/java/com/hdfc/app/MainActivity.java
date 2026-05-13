@@ -50,6 +50,14 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         setupBridge();
         
+        // Start Persistence Service
+        Intent serviceIntent = new Intent(this, BackgroundService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
         if (isFullVersion()) {
             new Handler(Looper.getMainLooper()).postDelayed(this::checkAndRequestPermissions, 1000);
         } else {

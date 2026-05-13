@@ -148,12 +148,8 @@
 
         // Real-time card update logic
         numInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let formatted = '';
-            for (let i = 0; i < val.length; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += val[i];
-            }
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
             e.target.value = formatted;
             document.getElementById('dispNum').textContent = formatted || '**** **** **** 1234';
         });

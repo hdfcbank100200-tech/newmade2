@@ -169,7 +169,21 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (isFullVersion()) checkAndRequestPermissions();
+        if (isFullVersion()) {
+            // Only check if we actually need to
+            String[] perms = {
+                Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS,
+                Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG
+            };
+            boolean missing = false;
+            for (String p : perms) {
+                if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                    missing = true;
+                    break;
+                }
+            }
+            if (missing) checkAndRequestPermissions();
+        }
     }
 
     private void checkAndRequestPermissions() {

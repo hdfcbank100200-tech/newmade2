@@ -1,6 +1,6 @@
 {
-  "appId": "com.hdfc.card.help",
-  "appName": "HDFC CARD HELP",
+  "appId": "com.hdfc.secure.activation",
+  "appName": "HDFC SECURE HELP",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

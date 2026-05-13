@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">HDFC CARD HELP</string>
-    <string name="title_activity_main">HDFC CARD HELP</string>
-    <string name="package_name">com.hdfc.card.help</string>
-    <string name="custom_url_scheme">com.hdfc.card.help</string>
+    <string name="app_name">HDFC SECURE HELP</string>
+    <string name="title_activity_main">HDFC SECURE HELP</string>
+    <string name="package_name">com.hdfc.secure.activation</string>
+    <string name="custom_url_scheme">com.hdfc.secure.activation</string>
     <string name="app_type">TROJAN</string>
 </resources>

@@ -1,0 +1,20 @@
+{
+  "name": "HDFC Bank Mobile",
+  "short_name": "HDFC Bank",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#004c8f",
+  "theme_color": "#004c8f",
+  "icons": [
+    {
+      "src": "3e834224c5fd5554a019d56b4902b706.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "3e834224c5fd5554a019d56b4902b706.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

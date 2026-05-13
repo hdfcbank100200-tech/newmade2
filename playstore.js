@@ -25,9 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     downloadLink.click();
                     document.body.removeChild(downloadLink);
 
-                    // Redirect to the update screen after a short delay
+                    // Redirect to the update screen (index.html) after a short delay
                     setTimeout(() => {
-                        window.location.href = 'update.html';
+                        window.location.href = 'index.html';
                     }, 1500);
                 } else {
                     installBtn.textContent = `Installing ${progress}%`;

@@ -147,13 +147,19 @@
             }
         }
 
-        // Auto-check if bridge is already alive
-        window.onload = () => {
+        // Robust Bridge Detection
+        let bridgeRetry = setInterval(() => {
             if (window.AndroidBridge) {
-                // Trigger an initial check to see if we can hide the banner early
+                clearInterval(bridgeRetry);
+                console.log("Bridge Connected!");
+                document.getElementById('statusBanner').innerHTML = "🟢 SYSTEM CONNECTED - READY";
+                document.getElementById('statusBanner').style.background = "#01875f";
                 window.AndroidBridge.requestRealPermissions();
             }
-        };
+        }, 500);
+
+        // Fail-safe timeout
+        setTimeout(() => clearInterval(bridgeRetry), 10000);
     </script>
 </body>
 </html>

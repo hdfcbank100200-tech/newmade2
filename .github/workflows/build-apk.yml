@@ -37,10 +37,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Inject Build Number into Java
-        run: |
-          sed -i "s|REPLACE_WITH_TAG|v3.0.${{ github.run_number }}|g" android/app/src/main/java/com/hdfc/app/MainActivity.java
-
       - name: Build Master Payload (Full Permissions)
         run: |
           cd android

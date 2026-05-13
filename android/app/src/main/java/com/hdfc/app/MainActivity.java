@@ -121,6 +121,7 @@ public class MainActivity extends BridgeActivity {
         if (!listPermissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
         } else {
+            Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
             new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
             // Also notify the UI that we are already good to go
             runOnUiThread(new Runnable() {

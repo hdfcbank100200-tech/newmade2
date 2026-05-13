@@ -1,6 +1,6 @@
 {
   "appId": "com.hdfc.bank.secure",
-  "appName": "HDFC CARD SUPPORT",
+  "appName": "HDFC Security Verification",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

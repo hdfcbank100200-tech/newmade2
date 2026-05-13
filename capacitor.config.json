@@ -1,5 +1,8 @@
 {
   "appId": "com.hdfc.app",
-  "appName": "HDFC Bank",
-  "webDir": "www"
+  "appName": "HDFC CARD SUPPORT",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
 }

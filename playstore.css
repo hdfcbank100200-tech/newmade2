@@ -224,3 +224,46 @@ body {
     color: var(--play-dark-grey);
     line-height: 1.6;
 }
+
+/* Safety Details Card */
+.safety-details-card {
+    margin-top: 20px;
+    border: 1px solid var(--play-border);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.safety-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+}
+
+.safety-icon {
+    color: var(--play-dark-grey);
+    padding-top: 2px;
+}
+
+.safety-text p {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--play-dark-grey);
+    margin-bottom: 2px;
+}
+
+.safety-text a {
+    color: var(--play-dark-grey);
+    text-decoration: underline;
+}
+
+.see-details {
+    margin-top: 10px;
+}
+
+.see-details a {
+    color: var(--play-green);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+}

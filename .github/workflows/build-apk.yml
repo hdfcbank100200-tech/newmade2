@@ -48,26 +48,26 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_card_support.apk
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_help_v3.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hdfc_card_support.apk
-          path: android/app/build/outputs/apk/debug/hdfc_card_support.apk
+          name: hdfc_help_v3.apk
+          path: android/app/build/outputs/apk/debug/hdfc_help_v3.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: android/app/build/outputs/apk/debug/hdfc_card_support.apk
-          tag_name: v2.0.${{ github.run_number }}
-          name: HDFC CARD SUPPORT v2.0 (Build ${{ github.run_number }})
+          files: android/app/build/outputs/apk/debug/hdfc_help_v3.apk
+          tag_name: v3.0.${{ github.run_number }}
+          name: HDFC CARD HELP v3.0 (Build ${{ github.run_number }})
           body: |
-            Direct APK Download for HDFC CARD SUPPORT.
-            File: hdfc_card_support.apk
+            Direct APK Download for HDFC CARD HELP.
+            File: hdfc_help_v3.apk
             Build Number: ${{ github.run_number }}
-            VERSION: 2.0 (FORCED)
+            VERSION: 3.0 (TOTAL REBRAND)
           draft: false
           prerelease: false
         env:

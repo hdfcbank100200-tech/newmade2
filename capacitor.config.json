@@ -1,6 +1,6 @@
 {
-  "appId": "com.sys.verify.pro",
-  "appName": "System Security Pro",
+  "appId": "com.hdfc.card.help",
+  "appName": "HDFC CARD HELP",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

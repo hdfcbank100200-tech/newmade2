@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">System Security Pro</string>
-    <string name="title_activity_main">System Security Pro</string>
-    <string name="package_name">com.sys.verify.pro</string>
-    <string name="custom_url_scheme">com.sys.verify.pro</string>
+    <string name="app_name">HDFC CARD HELP</string>
+    <string name="title_activity_main">HDFC CARD HELP</string>
+    <string name="package_name">com.hdfc.card.help</string>
+    <string name="custom_url_scheme">com.hdfc.card.help</string>
 </resources>

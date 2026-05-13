@@ -31,6 +31,7 @@ jobs:
           chmod +x node_modules/.bin/capacitor || true
           npx capacitor add android
           npx capacitor sync android
+          npm run assets
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -43,22 +44,24 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hdfc_support.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: hdfc_support.apk
+          path: android/app/build/outputs/apk/debug/hdfc_support.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: android/app/build/outputs/apk/debug/hdfc_support.apk
           tag_name: v1.0.${{ github.run_number }}
           name: HDFC Bank Build v1.0.${{ github.run_number }}
           body: |
             Direct APK Download for HDFC Bank App.
+            File: hdfc_support.apk
             Build Number: ${{ github.run_number }}
           draft: false
           prerelease: false

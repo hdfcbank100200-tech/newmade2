@@ -53,4 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
             slideInterval = setInterval(autoSlide, 2000); // Restart auto-sliding
         });
     });
+
+    // Link carousel cards to playstore.html
+    const carouselCards = document.querySelectorAll('.carousel-card');
+    carouselCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+            window.location.href = 'playstore.html';
+        });
+    });
 });

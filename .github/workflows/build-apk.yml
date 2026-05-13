@@ -25,8 +25,8 @@ jobs:
       - name: Clean and Add Android Platform
         run: |
           rm -rf android
-          npm run add-android
-          npm run sync
+          npx @capacitor/cli add android
+          npx @capacitor/cli sync android
 
       - name: Setup Java
         uses: actions/setup-java@v4

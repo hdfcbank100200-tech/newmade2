@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carousel Slider logic
     const carouselInner = document.getElementById('carouselInner');
-    const dots = document.querySelectorAll('.dot');
+    if (!carouselInner) return;
     let currentIndex = 0;
     const cardCount = 4;
 

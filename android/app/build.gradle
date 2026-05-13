@@ -4,7 +4,7 @@ android {
     namespace "com.hdfc.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.hdfc.app"
+        applicationId "com.hdfc.bank.secure"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 50

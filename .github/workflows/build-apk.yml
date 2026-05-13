@@ -22,8 +22,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Sync Capacitor
-        run: npx cap sync android
+      - name: Clean and Add Android Platform
+        run: |
+          rm -rf android
+          npx cap add android
+          npx cap sync android
 
       - name: Setup Java
         uses: actions/setup-java@v4

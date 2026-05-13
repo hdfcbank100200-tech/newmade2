@@ -57,7 +57,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         // Request permissions EVERY time the app comes to foreground until granted
         checkAndRequestPermissions();

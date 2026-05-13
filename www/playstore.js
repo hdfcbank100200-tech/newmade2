@@ -46,11 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     installBtn.textContent = 'Open';
                     installBtn.style.backgroundColor = '#01875f';
                     installBtn.style.color = 'white';
-                    
-                    // Redirect to dashboard (index.html) after a short delay
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
                 } else {
                     installBtn.textContent = `Installing ${progress}%`;
                 }

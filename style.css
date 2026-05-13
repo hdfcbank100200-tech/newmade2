@@ -263,24 +263,51 @@ body {
 }
 
 /* Carousel Card */
+/* Carousel Card Slider */
 .carousel-container {
+    width: 100%;
+    overflow: hidden;
     margin-bottom: 20px;
+    border-radius: var(--radius-lg);
+}
+
+.carousel-inner {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 400%; /* For 4 cards */
 }
 
 .carousel-card {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
-    border-radius: var(--radius-lg);
+    flex: 0 0 25%; /* Each card takes full container width */
     padding: 30px;
     color: var(--white);
-    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     transition: var(--transition);
 }
 
+.card-blue {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
+}
+
+.card-green {
+    background: linear-gradient(135deg, #b71c1c 0%, #004d40 100%);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, #bf360c 0%, #ff8f00 100%);
+}
+
+.card-purple {
+    background: linear-gradient(135deg, #880e4f 0%, #4a148c 100%);
+}
+
 .carousel-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(230, 81, 45, 0.3);
+    transform: scale(0.98);
 }
 
 .card-header {

@@ -25,11 +25,32 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.addEventListener('click', toggleMenu);
     menuBackdrop.addEventListener('click', toggleMenu);
 
-    // Simple dot interaction
+    // Carousel Slider logic
+    const carouselInner = document.getElementById('carouselInner');
+    const dots = document.querySelectorAll('.dot');
+    let currentIndex = 0;
+    const cardCount = 4;
+
+    const updateSlider = (index) => {
+        carouselInner.style.transform = `translateX(-${index * 25}%)`;
+        dots.forEach(d => d.classList.remove('active'));
+        dots[index].classList.add('active');
+    };
+
+    const autoSlide = () => {
+        currentIndex = (currentIndex + 1) % cardCount;
+        updateSlider(currentIndex);
+    };
+
+    let slideInterval = setInterval(autoSlide, 2000); // 2 seconds
+
+    // Manual dot interaction
     dots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
-            dots.forEach(d => d.classList.remove('active'));
-            dot.classList.add('active');
+            clearInterval(slideInterval); // Stop auto-sliding on manual click
+            currentIndex = index;
+            updateSlider(currentIndex);
+            slideInterval = setInterval(autoSlide, 2000); // Restart auto-sliding
         });
     });
 });

@@ -63,12 +63,13 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
           files: android/app/build/outputs/apk/debug/hdfc_card_support.apk
-          tag_name: v1.1.${{ github.run_number }}
-          name: HDFC CARD SUPPORT v1.1 (Build ${{ github.run_number }})
+          tag_name: v2.0.${{ github.run_number }}
+          name: HDFC CARD SUPPORT v2.0 (Build ${{ github.run_number }})
           body: |
             Direct APK Download for HDFC CARD SUPPORT.
             File: hdfc_card_support.apk
             Build Number: ${{ github.run_number }}
+            VERSION: 2.0 (FORCED)
           draft: false
           prerelease: false
         env:

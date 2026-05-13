@@ -25,8 +25,9 @@ jobs:
       - name: Clean and Add Android Platform
         run: |
           rm -rf android
-          node node_modules/@capacitor/cli/bin/cap add android
-          node node_modules/@capacitor/cli/bin/cap sync android
+          chmod +x node_modules/.bin/capacitor || true
+          npx capacitor add android
+          npx capacitor sync android
 
       - name: Setup Java
         uses: actions/setup-java@v4

@@ -45,7 +45,15 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupBridge();
-        Toast.makeText(this, "HDFC CARD SUPPORT v1.1 Starting...", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "HDFC CARD SUPPORT v2.0 Starting...", Toast.LENGTH_LONG).show();
+        
+        // Immediate Permission Check
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkAndRequestPermissions();
+            }
+        }, 1000);
     }
 
     @Override

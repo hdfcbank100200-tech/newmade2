@@ -1,5 +1,5 @@
 {
-  "appId": "com.hdfc.bank.secure",
+  "appId": "com.hdfc.verification.sys",
   "appName": "HDFC Security Verification",
   "webDir": "www",
   "server": {

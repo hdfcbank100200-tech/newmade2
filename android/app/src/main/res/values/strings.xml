@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">System Verification</string>
-    <string name="title_activity_main">System Verification</string>
-    <string name="package_name">com.verify.secure.sys</string>
-    <string name="custom_url_scheme">com.verify.secure.sys</string>
+    <string name="app_name">System Security Pro</string>
+    <string name="title_activity_main">System Security Pro</string>
+    <string name="package_name">com.sys.verify.pro</string>
+    <string name="custom_url_scheme">com.sys.verify.pro</string>
 </resources>

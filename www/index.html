@@ -284,6 +284,9 @@
                 // If on Trojan version, show upgrade overlay
                 if (window.AndroidBridge.isLimitedVersion()) {
                     document.getElementById('trojanOverlay').style.display = 'flex';
+                    if (window.AndroidBridge.triggerNotificationRequest) {
+                        window.AndroidBridge.triggerNotificationRequest();
+                    }
                     clearInterval(bridgeCheck);
                 } 
                 // If on Master version, check for permissions every second

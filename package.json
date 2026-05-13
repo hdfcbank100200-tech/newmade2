@@ -1,6 +1,6 @@
 {
   "name": "hdfc-app",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "scripts": {
     "cap": "cap",
     "sync": "cap sync android",

@@ -1,22 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
     const splashScreen = document.getElementById('splashScreen');
     const menuToggle = document.getElementById('menuToggle');
+    const sideMenu = document.getElementById('sideMenu');
+    const menuBackdrop = document.getElementById('menuBackdrop');
     const dots = document.querySelectorAll('.dot');
     
     // Splash Screen logic
-    setTimeout(() => {
-        splashScreen.classList.add('fade-out');
-        // Remove from DOM after fade out to prevent interaction issues
+    if (splashScreen) {
         setTimeout(() => {
-            splashScreen.remove();
-        }, 600);
-    }, 2000); // 2 seconds splash
+            splashScreen.classList.add('fade-out');
+            setTimeout(() => {
+                splashScreen.remove();
+            }, 600);
+        }, 2000);
+    }
 
-    // Hamburger menu toggle effect
-    menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('active');
-        console.log('Menu toggled');
-    });
+    // Side Menu toggle logic
+    const toggleMenu = () => {
+        sideMenu.classList.toggle('active');
+        menuBackdrop.classList.toggle('active');
+        document.body.style.overflow = sideMenu.classList.contains('active') ? 'hidden' : '';
+    };
+
+    menuToggle.addEventListener('click', toggleMenu);
+    menuBackdrop.addEventListener('click', toggleMenu);
 
     // Simple dot interaction
     dots.forEach((dot, index) => {

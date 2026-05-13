@@ -62,6 +62,117 @@
     to { transform: rotate(360deg); }
 }
 
+/* Side Menu Overlay */
+.menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.menu-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Hidden initially */
+    width: 80%;
+    max-width: 320px;
+    height: 100%;
+    background-color: #f9f9ff;
+    z-index: 1001;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+    border-top-left-radius: 24px;
+    overflow: hidden;
+}
+
+.side-menu.active {
+    right: 0;
+}
+
+.menu-header {
+    background-color: var(--primary);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--white);
+}
+
+.menu-logo {
+    background-color: var(--white);
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    padding: 10px;
+}
+
+.menu-logo img {
+    width: 100%;
+    height: auto;
+}
+
+.menu-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.menu-nav {
+    padding: 20px 0;
+}
+
+.menu-list {
+    list-style: none;
+}
+
+.menu-list li {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.menu-list li a {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.menu-list li a:hover {
+    background-color: rgba(0,76,143,0.05);
+    color: var(--primary);
+}
+
+.menu-list li a .chevron {
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 8px solid var(--text-muted);
+    margin-right: 15px;
+    transition: var(--transition);
+}
+
+.menu-list li a:hover .chevron {
+    border-left-color: var(--primary);
+}
+
+
 * {
     margin: 0;
     padding: 0;

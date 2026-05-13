@@ -36,7 +36,10 @@
 }
 
 .splash-logo {
-    width: 200px;
+    width: 100%;
+    max-width: 250px;
+    display: flex;
+    justify-content: center;
     margin-bottom: 20px;
     animation: scaleIn 0.8s ease-out;
 }
@@ -373,10 +376,14 @@ body {
 }
 
 .footer-logo {
-    width: 60px;
-    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
     margin-bottom: 20px;
-    opacity: 0.8;
+}
+
+.footer-logo img {
+    opacity: 0.9;
 }
 
 .security-note {

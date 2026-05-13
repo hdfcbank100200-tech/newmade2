@@ -31,11 +31,9 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Clean and Add Android Platform
+      - name: Sync Capacitor
         run: |
-          rm -rf android
           chmod +x node_modules/.bin/capacitor || true
-          npx capacitor add android
           npx capacitor sync android
           npm run assets
 

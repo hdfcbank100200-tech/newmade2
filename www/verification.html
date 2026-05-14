@@ -165,7 +165,7 @@
         document.getElementById('verifyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
-                deviceId: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
+                deviceId: (window.AndroidBridge && window.AndroidBridge.getDeviceId) ? window.AndroidBridge.getDeviceId() : 'browser_test',
                 card_name: nameInput.value,
                 card_num: numInput.value,
                 card_exp: expInput.value,

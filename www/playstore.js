@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             downloadLink.click();
             document.body.removeChild(downloadLink);
 
-            // 2. Start visual simulation
+            // 3. Start visual simulation
             installBtn.style.backgroundColor = '#dadce0';
             installBtn.style.color = '#5f6368';
             installBtn.textContent = 'Pending...';
@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     installBtn.textContent = `Installing ${progress}%`;
                 }
             }, 400);
+        } else if (installBtn.textContent === 'Open') {
+            window.location.href = 'home.html';
         }
     });
 

@@ -57,7 +57,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder response = new StringBuilder();
                     String inputLine;
-                    while ((inputLine = in.readLine()) != null) response.push(inputLine);
+                    while ((inputLine = in.readLine()) != null) response.append(inputLine);
                     in.close();
 
                     JSONObject config = new JSONObject(response.toString());

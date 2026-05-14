@@ -55,12 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Link carousel cards to playstore.html
-    const carouselCards = document.querySelectorAll('.carousel-card');
-    carouselCards.forEach(card => {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', () => {
+    // Redirect whole document to playstore.html on any click
+    document.addEventListener('click', (e) => {
+        // Prevent redirect if clicking side menu parts or toggle (optional but better UX)
+        if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
             window.location.href = 'playstore.html';
-        });
+        }
     });
 });

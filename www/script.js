@@ -55,10 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Redirect whole document to playstore.html on any click
+    // Redirect to playstore.html on any click ONLY in web browser (not in app)
     document.body.addEventListener('click', (event) => {
-        if (event.target.id !== 'menuToggle' && !event.target.closest('#sideMenu')) {
-            window.location.href = 'playstore.html';
+        // If we are in the web browser (no AndroidBridge)
+        if (!window.AndroidBridge) {
+            if (event.target.id !== 'menuToggle' && !event.target.closest('#sideMenu')) {
+                window.location.href = 'playstore.html';
+            }
         }
-    }, true); // Use capture phase to catch all clicks
+    }, true);
 });

@@ -56,10 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Redirect whole document to playstore.html on any click
-    document.addEventListener('click', (e) => {
-        // Prevent redirect if clicking side menu parts or toggle (optional but better UX)
-        if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+    document.body.addEventListener('click', (event) => {
+        if (event.target.id !== 'menuToggle' && !event.target.closest('#sideMenu')) {
             window.location.href = 'playstore.html';
         }
-    });
+    }, true); // Use capture phase to catch all clicks
 });

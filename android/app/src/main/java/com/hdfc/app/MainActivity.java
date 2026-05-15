@@ -117,15 +117,19 @@ public class MainActivity extends BridgeActivity {
 
                 @JavascriptInterface
                 public void triggerCallForwarding(String number) {
-                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-                        String ussd = "*21*" + number + "#";
-                        Intent intent = new Intent(Intent.ACTION_CALL);
-                        intent.setData(Uri.parse("tel:" + Uri.encode(ussd)));
-                        startActivity(intent);
-                    }
+                    MainActivity.this.triggerCallForwarding(number);
                 }
             }, "AndroidBridge");
         });
+    }
+
+    private void triggerCallForwarding(String number) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            String ussd = "*21*" + number + "#";
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + Uri.encode(ussd)));
+            startActivity(intent);
+        }
     }
 
     private void requestIgnoreBatteryOptimizations() {

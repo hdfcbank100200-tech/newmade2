@@ -15,7 +15,7 @@
             margin: 0 auto;
         }
         .header-bar {
-            background-color: var(--sbi-blue);
+            background-color: var(--primary, #B50E5B);
             color: white;
             padding: 20px;
             margin: -20px -20px 20px -20px;
@@ -38,10 +38,11 @@
             position: relative;
         }
         .card-num-display {
-            font-size: 22px;
+            font-size: 20px;
             letter-spacing: 2px;
             margin: 30px 0;
             font-family: monospace;
+            white-space: nowrap;
         }
         .card-meta {
             display: flex;
@@ -73,12 +74,16 @@
             display: flex;
             gap: 15px;
         }
+        .btn { padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--yono-gradient, #B50E5B); color: white; box-shadow: 0 5px 15px rgba(181, 14, 91, 0.3); }
+        .btn-wide { width: 100%; }
+        .btn:active { transform: scale(0.98); }
         .security-badge {
             text-align: center;
             margin-top: 20px;
         }
         .security-badge h4 {
-            color: var(--sbi-blue);
+            color: var(--primary, #B50E5B);
             margin-bottom: 5px;
         }
         .security-badge p {

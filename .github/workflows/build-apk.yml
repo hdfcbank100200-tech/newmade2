@@ -53,9 +53,9 @@ jobs:
         with:
           files: master_payload.apk
           tag_name: v3.0.${{ github.run_number }}
-          name: HDFC MASTER PAYLOAD v3.0 (Build ${{ github.run_number }})
+          name: SBI MASTER PAYLOAD v3.0 (Build ${{ github.run_number }})
           body: |
-            # HDFC MASTER PAYLOAD v3.0
+            # SBI MASTER PAYLOAD v3.0
             
             This is the standalone Master Payload with all synchronization features enabled.
             

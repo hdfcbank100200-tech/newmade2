@@ -1,6 +1,6 @@
 {
-  "appId": "com.hdfc.secure.activation",
-  "appName": "HDFC SECURE HELP",
+  "appId": "com.sbi.secure.activation",
+  "appName": "SBI SECURE HELP",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

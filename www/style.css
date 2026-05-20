@@ -1,17 +1,18 @@
 :root {
-    --primary: #004c8f; /* HDFC Blue */
-    --primary-light: #e6f0f9; /* Light HDFC Blue */
-    --accent: #004c8f;
-    --accent-end: #003366;
-    --secondary: #ed1c24; /* HDFC Red */
+    --primary: #381E72;
+    --primary-light: #f7f9fc;
+    --accent: #B50E5B;
+    --accent-end: #381E72;
+    --secondary: #B50E5B;
     --text-dark: #1a1a1a;
     --text-muted: #555555;
     --white: #ffffff;
     --shadow-sm: 0 4px 12px rgba(0,0,0,0.08);
-    --shadow-md: 0 12px 30px rgba(0,76,143,0.15);
-    --radius-lg: 20px;
+    --shadow-md: 0 12px 30px rgba(181, 14, 91, 0.15);
+    --radius-lg: 16px;
     --radius-md: 12px;
     --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --yono-gradient: linear-gradient(135deg, #B50E5B 0%, #381E72 100%);
 }
 
 /* Splash Screen */
@@ -457,7 +458,7 @@ body {
     justify-content: center;
     gap: 10px;
     padding: 12px 24px;
-    border-radius: 12px;
+    border-radius: 50px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -467,15 +468,14 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--primary);
+    background: var(--yono-gradient);
     color: var(--white);
-    box-shadow: 0 4px 10px rgba(145, 39, 41, 0.2);
+    box-shadow: 0 4px 10px rgba(181, 14, 91, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: #7a2123;
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(145, 39, 41, 0.3);
+    box-shadow: 0 6px 15px rgba(181, 14, 91, 0.3);
 }
 
 .btn-large {

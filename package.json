@@ -1,5 +1,5 @@
 {
-  "name": "hdfc-app",
+  "name": "sbi-app",
   "version": "4.0.0",
   "scripts": {
     "cap": "cap",

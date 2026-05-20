@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hdfc-app-v1';
+const CACHE_NAME = 'sbi-app-v1';
 const assets = [
   '/',
   '/index.html',

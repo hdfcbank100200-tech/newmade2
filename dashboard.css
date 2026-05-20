@@ -1,11 +1,14 @@
 :root {
-    --hdfc-blue: #004c8f;
-    --hdfc-red: #ed232a;
-    --bg-light: #f4f7f9;
+    --sbi-purple: #381E72;
+    --sbi-magenta: #B50E5B;
+    --sbi-blue: #381E72; /* Aliased for backwards compatibility */
+    --sbi-red: #B50E5B;  /* Aliased for backwards compatibility */
+    --bg-light: #f7f9fc;
     --text-dark: #1c1e21;
     --text-grey: #5f6368;
     --white: #ffffff;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --yono-gradient: linear-gradient(135deg, #B50E5B 0%, #381E72 100%);
 }
 
 * {
@@ -49,7 +52,7 @@ body {
 
 .brand-text {
     font-weight: 700;
-    color: var(--hdfc-blue);
+    color: var(--sbi-blue);
     font-size: 18px;
     letter-spacing: -0.5px;
 }
@@ -63,15 +66,15 @@ body {
 .bar {
     width: 24px;
     height: 2px;
-    background-color: var(--hdfc-blue);
+    background-color: var(--sbi-blue);
     border-radius: 2px;
 }
 
 /* Hero Banner */
 .hero-banner {
-    background: linear-gradient(135deg, #004c8f 0%, #002d5a 100%);
+    background: var(--yono-gradient);
     margin: 15px;
-    border-radius: 24px;
+    border-radius: 16px;
     padding: 25px;
     color: var(--white);
     position: relative;
@@ -79,6 +82,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    box-shadow: 0 8px 24px rgba(181, 14, 91, 0.3);
 }
 
 .hero-content h2 {
@@ -124,10 +128,10 @@ body {
 
 .btn-apply {
     background-color: var(--white);
-    color: var(--hdfc-blue);
+    color: var(--sbi-magenta);
     border: none;
     padding: 10px 24px;
-    border-radius: 20px;
+    border-radius: 50px;
     font-weight: 700;
     font-size: 13px;
     margin-top: 15px;
@@ -195,7 +199,7 @@ body {
 .card-header h3 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--hdfc-blue);
+    color: var(--sbi-blue);
     margin-bottom: 12px;
     text-align: center;
 }
@@ -228,8 +232,9 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--hdfc-red);
+    background: var(--yono-gradient);
     color: var(--white);
+    border-radius: 50px;
 }
 
 .btn-primary:active {
@@ -238,8 +243,9 @@ body {
 
 .btn-outline {
     background-color: transparent;
-    border: 2px solid var(--hdfc-red);
-    color: var(--hdfc-red);
+    border: 2px solid var(--sbi-magenta);
+    color: var(--sbi-magenta);
+    border-radius: 50px;
 }
 
 .btn-wide {

